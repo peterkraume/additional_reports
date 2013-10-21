@@ -3,7 +3,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 CERDAN Yohann <cerdanyohann@yahoo.fr>
+ *  (c) 2013 CERDAN Yohann <cerdanyohann@yahoo.fr>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -36,7 +36,11 @@ class tx_additionalreports_main {
 	 * @return string
 	 */
 	public static function getCss() {
-		return t3lib_extMgm::extRelPath('additional_reports') . 'res/css/tx_additionalreports.css';
+		return t3lib_extMgm::extPath('additional_reports') . 'res/css/tx_additionalreports.css';
+	}
+
+	public function getLl($key) {
+		return $GLOBALS['LANG']->getLL($key);
 	}
 
 	/**
@@ -45,11 +49,6 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function displayXclass() {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/xclass.html');
-
-		$content = '';
-
 		$xclassList = array(
 			'BE' => $GLOBALS['TYPO3_CONF_VARS']['BE']['XCLASS'],
 			'FE' => $GLOBALS['TYPO3_CONF_VARS']['FE']['XCLASS']
@@ -59,50 +58,11 @@ class tx_additionalreports_main {
 			$xclassList['autoload'] = tx_additionalreports_util::getAutoloadXlass();
 		}
 
-		foreach ($xclassList as $keyXclass => $items) {
-			$markersArray = array();
-
-			if ($keyXclass == 'FE') {
-				$markersArray['###LLL:TITLE###'] = 'Frontend';
-			}
-			if ($keyXclass == 'BE') {
-				$markersArray['###LLL:TITLE###'] = 'Backend';
-			}
-			if ($keyXclass == 'autoload') {
-				if ($xclassList['autoload'] === NULL) {
-					$content .= tx_additionalreports_util::writeInformation(
-						$GLOBALS['LANG']->getLL('careful'),
-						$GLOBALS['LANG']->getLL('xclasscarefuldesc')
-					);
-				}
-				$markersArray['###LLL:TITLE###'] = 'Autoload XCLASS (6.0)';
-			}
-
-			$markersArray['###LLL:NAME###'] = $GLOBALS['LANG']->getLL('name');
-			$markersArray['###LLL:PATH###'] = $GLOBALS['LANG']->getLL('path');
-
-			if (count($items) > 0) {
-				$markersArrayTemp = array();
-				foreach ($items as $itemKey => $itemValue) {
-					$markersArrayTemp[] = array(
-						'###NAME###' => $itemKey,
-						'###PATH###' => $itemValue
-					);
-				}
-				$markersArray['###REPORTS_XCLASS_OBJECT###'] = $template->renderAllTemplate(
-					$markersArrayTemp, '###REPORTS_XCLASS_OBJECT###'
-				);
-			} else {
-				$markersArray['###REPORTS_XCLASS_OBJECT###'] = $template->renderAllTemplate(
-					array('###NORESULTS###' => $GLOBALS['LANG']->getLL('noresults')),
-					'###REPORTS_XCLASS_NORESULTS###'
-				);
-			}
-
-			$content .= $template->renderAllTemplate($markersArray, '###REPORTS_XCLASS###');
-		}
-
-		return $content;
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/xclass-fluid.html');
+		$view->assign('xclass', $xclassList);
+		$view->assign('typo3version', tx_additionalreports_util::intFromVer(TYPO3_version));
+		return $view->render();
 	}
 
 	/**
@@ -111,31 +71,10 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function displayAjax() {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/ajax.html');
-
-		$items = $GLOBALS['TYPO3_CONF_VARS']['BE']['AJAX'];
-		$markersArray = array();
-		$markersArray['###LLL:TITLE###'] = $GLOBALS['LANG']->getLL('ajax_description');
-		$markersArray['###LLL:NAME###'] = $GLOBALS['LANG']->getLL('name');
-		$markersArray['###LLL:PATH###'] = $GLOBALS['LANG']->getLL('path');
-
-		if (count($items) > 0) {
-			$markersArrayTemp = array();
-			foreach ($items as $itemKey => $itemValue) {
-				$markersArrayTemp[] = array(
-					'###NAME###' => $itemKey,
-					'###PATH###' => $itemValue
-				);
-			}
-			$markersArray['###REPORTS_AJAX_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_AJAX_OBJECT###'
-			);
-		} else {
-			return $GLOBALS['LANG']->getLL('noresults');
-		}
-
-		return $template->renderAllTemplate($markersArray, '###REPORTS_AJAX###');
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/ajax-fluid.html');
+		$view->assign('ajax', $GLOBALS['TYPO3_CONF_VARS']['BE']['AJAX']);
+		return $view->render();
 	}
 
 	/**
@@ -144,37 +83,26 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function displayCliKeys() {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/clikeys.html');
-
 		$items = $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['GLOBAL']['cliKeys'];
-		$markersArray = array();
-		$markersArray['###LLL:TITLE###'] = $GLOBALS['LANG']->getLL('clikeys_description');
-		$markersArray['###LLL:EXTENSION###'] = $GLOBALS['LANG']->getLL('extension');
-		$markersArray['###LLL:NAME###'] = $GLOBALS['LANG']->getLL('name');
-		$markersArray['###LLL:PATH###'] = $GLOBALS['LANG']->getLL('path');
-		$markersArray['###LLL:USER###'] = $GLOBALS['LANG']->getLL('user');
+		$clikeys = array();
 
 		if (count($items) > 0) {
-			$markersArrayTemp = array();
 			foreach ($items as $itemKey => $itemValue) {
 				preg_match('/EXT:(.*?)\//', $itemValue[0], $ext);
-				$markersArrayTemp[] = array(
-					'###ICONEXT###'   => tx_additionalreports_util::getExtIcon($ext[1]),
-					'###EXTENSION###' => $ext[1],
-					'###NAME###'      => $itemKey,
-					'###PATH###'      => $itemValue[0],
-					'###USER###'      => $itemValue[1]
+				$clikeys[] = array(
+					'icon'      => tx_additionalreports_util::getExtIcon($ext[1]),
+					'extension' => $ext[1],
+					'name'      => $itemKey,
+					'path'      => $itemValue[0],
+					'user'      => $itemValue[1]
 				);
 			}
-			$markersArray['###REPORTS_CLIKEYS_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_CLIKEYS_OBJECT###'
-			);
-		} else {
-			return $GLOBALS['LANG']->getLL('noresults');
 		}
 
-		return $template->renderAllTemplate($markersArray, '###REPORTS_CLIKEYS###');
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/clikeys-fluid.html');
+		$view->assign('clikeys', $clikeys);
+		return $view->render();
 	}
 
 	/**
@@ -183,37 +111,27 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function displayEid() {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/eid.html');
-
 		$items = $GLOBALS['TYPO3_CONF_VARS']['FE']['eID_include'];
-		$markersArray = array();
-		$markersArray['###LLL:TITLE###'] = $GLOBALS['LANG']->getLL('eid_description');
-		$markersArray['###LLL:EXTENSION###'] = $GLOBALS['LANG']->getLL('extension');
-		$markersArray['###LLL:NAME###'] = $GLOBALS['LANG']->getLL('name');
-		$markersArray['###LLL:PATH###'] = $GLOBALS['LANG']->getLL('path');
+		$eids = array();
 
 		if (count($items) > 0) {
-			$markersArrayTemp = array();
 			foreach ($items as $itemKey => $itemValue) {
 				preg_match('/EXT:(.*?)\//', $itemValue, $ext);
 				if (t3lib_extMgm::isLoaded($ext[1])) {
-					$markersArrayTemp[] = array(
-						'###ICONEXT###'   => tx_additionalreports_util::getExtIcon($ext[1]),
-						'###EXTENSION###' => $ext[1],
-						'###NAME###'      => $itemKey,
-						'###PATH###'      => $itemValue
+					$eids[] = array(
+						'icon'      => tx_additionalreports_util::getExtIcon($ext[1]),
+						'extension' => $ext[1],
+						'name'      => $itemKey,
+						'path'      => $itemValue
 					);
 				}
 			}
-			$markersArray['###REPORTS_EID_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_EID_OBJECT###'
-			);
-		} else {
-			return $GLOBALS['LANG']->getLL('noresults');
 		}
 
-		return $template->renderAllTemplate($markersArray, '###REPORTS_EID###');
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/eid-fluid.html');
+		$view->assign('eids', $eids);
+		return $view->render();
 	}
 
 	/**
@@ -222,31 +140,22 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function displayExtDirect() {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/extdirect.html');
-
 		$items = $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ExtDirect'];
-		$markersArray = array();
-		$markersArray['###LLL:TITLE###'] = $GLOBALS['LANG']->getLL('extdirect_description');
-		$markersArray['###LLL:NAME###'] = $GLOBALS['LANG']->getLL('name');
-		$markersArray['###LLL:PATH###'] = $GLOBALS['LANG']->getLL('path');
+		$extdirects = array();
 
 		if (count($items) > 0) {
-			$markersArrayTemp = array();
 			foreach ($items as $itemKey => $itemValue) {
-				$markersArrayTemp[] = array(
-					'###NAME###' => $itemKey,
-					'###PATH###' => tx_additionalreports_util::viewArray($itemValue)
+				$extdirects[] = array(
+					'name' => $itemKey,
+					'path' => tx_additionalreports_util::viewArray($itemValue)
 				);
 			}
-			$markersArray['###REPORTS_EXTDIRECT_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_EXTDIRECT_OBJECT###'
-			);
-		} else {
-			return $GLOBALS['LANG']->getLL('noresults');
 		}
 
-		return $template->renderAllTemplate($markersArray, '###REPORTS_EXTDIRECT###');
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/extdirect-fluid.html');
+		$view->assign('extdirects', $extdirects);
+		return $view->render();
 	}
 
 	/**
@@ -255,12 +164,7 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function displayExtensions() {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/extensions.html');
-
-		$content = '';
 		$path = PATH_typo3conf . 'ext/';
-		$items = array();
 		$itemsDev = array();
 		$itemsUnloaded = array();
 		$extensionsToUpdate = 0;
@@ -271,10 +175,13 @@ class tx_additionalreports_main {
 		$items = tx_additionalreports_util::getInstExtList($path, 'L');
 		$dbSchema = tx_additionalreports_util::getDatabaseSchema();
 
+		$listExtensionsTer = array();
+		$listExtensionsDev = array();
+		$listExtensionsUnloaded = array();
+
 		/********************************* loaded extension(s) *********************************/
 
 		if (count($items) > 0) {
-			$markersArrayTemp = array();
 			foreach ($items as $itemKey => $itemValue) {
 				if (t3lib_extMgm::isLoaded($itemKey)) {
 					$extensionsLoaded++;
@@ -283,8 +190,6 @@ class tx_additionalreports_main {
 					$extInfo = $itemValue;
 					$fdFile = array();
 					$updateStatements = array();
-					$affectedFiles = array();
-					$lastVersion = '';
 
 					$lastVersion = tx_additionalreports_util::checkExtensionUpdate($extInfo);
 					$affectedFiles = tx_additionalreports_util::getExtAffectedFiles($extInfo);
@@ -294,14 +199,12 @@ class tx_additionalreports_main {
 						$itemsDev[$itemKey] = $itemValue;
 						$extensionsDev++;
 					} else {
-						$markersArrayExtension = array();
-						$markersArrayExtension['###ICONEXT###'] = tx_additionalreports_util::getExtIcon($extKey);
-						$markersArrayExtension['###EXTENSION###'] = $extKey;
-						$markersArrayExtension['###EXTENSIONLINK###'] = '<a href="#" onclick="';
-						$markersArrayExtension['###EXTENSIONLINK###'] .= tx_additionalreports_util::goToModuleEm($extKey) . '">';
-						$markersArrayExtension['###EXTENSIONLINK###'] .= tx_additionalreports_util::getIconZoom() . '</a>';
-						$markersArrayExtension['###VERSION###'] = $itemValue['EM_CONF']['version'];
-						$markersArrayExtension['###VERSIONCHECK###'] = tx_additionalreports_util::versionCompare($itemValue['EM_CONF']['constraints']['depends']['typo3']);
+						$listExtensionsTerItem = array();
+						$listExtensionsTerItem['icon'] = tx_additionalreports_util::getExtIcon($extKey);
+						$listExtensionsTerItem['extension'] = $extKey;
+						$listExtensionsTerItem['extensionlink'] = '<a href="#" onclick="' . tx_additionalreports_util::goToModuleEm($extKey) . '">' . tx_additionalreports_util::getIconZoom() . '</a>';
+						$listExtensionsTerItem['version'] = $itemValue['EM_CONF']['version'];
+						$listExtensionsTerItem['versioncheck'] = tx_additionalreports_util::versionCompare($itemValue['EM_CONF']['constraints']['depends']['typo3']);
 
 						// need extension update ?
 						$updateDate = date('d/m/Y', $lastVersion['lastuploaddate']);
@@ -310,29 +213,29 @@ class tx_additionalreports_main {
 						}
 						if (version_compare($itemValue['EM_CONF']['version'], $lastVersion['version'], '<')) {
 							$extensionsToUpdate++;
-							$markersArrayExtension['###VERSIONLAST###'] = '<span style="color:green;font-weight:bold;">' . $lastVersion['version'] . '&nbsp;(' . $updateDate . ')</span>';
+							$listExtensionsTerItem['versionlast'] = '<span style="color:green;font-weight:bold;">' . $lastVersion['version'] . '&nbsp;(' . $updateDate . ')</span>';
 						} else {
-							$markersArrayExtension['###VERSIONLAST###'] = $lastVersion['version'] . '&nbsp;(' . $updateDate . ')';
+							$listExtensionsTerItem['versionlast'] = $lastVersion['version'] . '&nbsp;(' . $updateDate . ')';
 						}
 
-						$markersArrayExtension['###DOWNLOADS###'] = $lastVersion['alldownloadcounter'];
+						$listExtensionsTerItem['downloads'] = $lastVersion['alldownloadcounter'];;
 
 						// show db
 						$dumpTf1 = '';
 						$dumpTf2 = '';
 						if (count($fdFile) > 0) {
 							$id = 'sql' . $extKey;
-							$dumpTf1 = count($fdFile) . ' ' . $GLOBALS['LANG']->getLL('extensions_tablesmodified');
+							$dumpTf1 = count($fdFile) . ' ' . self::getLl('extensions_tablesmodified');
 							$dumpTf2 = tx_additionalreports_util::writePopUp($id, $extKey, tx_additionalreports_util::viewArray($fdFile));
 						}
-						$markersArrayExtension['###TABLES###'] = $dumpTf1;
-						$markersArrayExtension['###TABLESLINK###'] = $dumpTf2;
+						$listExtensionsTerItem['tables'] = $dumpTf1;
+						$listExtensionsTerItem['tableslink'] = $dumpTf2;
 
 						// need db update
 						if (count($updateStatements) > 0) {
-							$markersArrayExtension['###TABLESINTEGRITY###'] = $GLOBALS['LANG']->getLL('yes');
+							$listExtensionsTerItem['tablesintegrity'] = self::getLl('yes');
 						} else {
-							$markersArrayExtension['###TABLESINTEGRITY###'] = $GLOBALS['LANG']->getLL('no');
+							$listExtensionsTerItem['tablesintegrity'] = self::getLl('no');
 						}
 
 						// need extconf update
@@ -356,19 +259,18 @@ class tx_additionalreports_main {
 								$datas .= '<span style="color:white;">ext_conf_template.txt : </span>';
 								$datas .= tx_additionalreports_util::viewArray($tsparserObj->setup);
 								$dumpExtConf = tx_additionalreports_util::writePopUp($id, $extKey, $datas);
-								$markersArrayExtension['###CONFINTEGRITY###'] = $GLOBALS['LANG']->getLL('yes') . '&nbsp;&nbsp;' . $dumpExtConf;
+								$listExtensionsTerItem['confintegrity'] = self::getLl('yes') . '&nbsp;&nbsp;' . $dumpExtConf;
 							} else {
-								$markersArrayExtension['###CONFINTEGRITY###'] = $GLOBALS['LANG']->getLL('no');
+								$listExtensionsTerItem['confintegrity'] = self::getLl('no');
 							}
 						} else {
-							$markersArrayExtension['###CONFINTEGRITY###'] = $GLOBALS['LANG']->getLL('no');
+							$listExtensionsTerItem['confintegrity'] = self::getLl('no');
 						}
 
 						// modified files
 						if (count($affectedFiles) > 0) {
 							$extensionsModified++;
 							$id = 'files' . $extKey;
-
 							$contentUl = '<div style="display:none;" id="' . $id . '"><ul>';
 							foreach ($affectedFiles as $affectedFile) {
 								$compareUrl = t3lib_div::getIndpEnv('TYPO3_SITE_URL');
@@ -380,54 +282,27 @@ class tx_additionalreports_main {
 							}
 							$contentUl .= '</ul>';
 							$contentUl .= '</div>';
-							$markersArrayExtension['###FILES###'] = count($affectedFiles) . ' ' . $GLOBALS['LANG']->getLL('extensions_filesmodified') . $contentUl;
-							$markersArrayExtension['###FILESLINK###'] = '<input type="button" onclick="$(\'' . $id . '\').toggle();" value="+"/>';
+							$listExtensionsTerItem['files'] = count($affectedFiles) . ' ' . self::getLl('extensions_filesmodified') . $contentUl;
+							$listExtensionsTerItem['fileslink'] = '<input type="button" onclick="$(\'' . $id . '\').toggle();" value="+"/>';
 						} else {
-							$markersArrayExtension['###FILES###'] = '&nbsp;';
-							$markersArrayExtension['###FILESLINK###'] = '&nbsp;';
+							$listExtensionsTerItem['files'] = '&nbsp;';
+							$listExtensionsTerItem['fileslink'] = '&nbsp;';
 						}
-
-						$content .= '</tr>';
-						$markersArrayTemp[] = $markersArrayExtension;
+						$listExtensionsTer[] = $listExtensionsTerItem;
 					}
 				} else {
 					$itemsUnloaded[$itemKey] = $itemValue;
 				}
 
 			}
-			$markersArray['###REPORTS_EXTENSIONS_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_EXTENSIONS_OBJECT###'
-			);
-		} else {
-			$markersArray['###REPORTS_EXTENSIONS_OBJECT###'] = $template->renderAllTemplate(
-				array('###NORESULTS###' => $GLOBALS['LANG']->getLL('noresults')),
-				'###REPORTS_EXTENSIONS_NORESULTS###'
-			);
 		}
 
-		$markersArray['###LLL:TITLELOADED###'] = $extensionsLoaded - count($itemsDev) . ' ' . $GLOBALS['LANG']->getLL(
-				'extensions_ter'
-			);
-		$markersArray['###LLL:TITLEDEV###'] = count($itemsDev) . ' ' . $GLOBALS['LANG']->getLL('extensions_dev');
-		$markersArray['###LLL:TITLEULOADED###'] = count($itemsUnloaded) . ' ' . $GLOBALS['LANG']->getLL('extensions_unloaded');
-		$markersArray['###LLL:EXTENSION###'] = $GLOBALS['LANG']->getLL('extension');
-		$markersArray['###LLL:VERSION###'] = $GLOBALS['LANG']->getLL('status_version');
-		$markersArray['###LLL:VERSIONCHECK###'] = $GLOBALS['LANG']->getLL('versioncheck');
-		$markersArray['###LLL:VERSIONLAST###'] = $GLOBALS['LANG']->getLL('status_lastversion');
-		$markersArray['###LLL:DOWNLOADS###'] = $GLOBALS['LANG']->getLL('downloads');
-		$markersArray['###LLL:TABLES###'] = $GLOBALS['LANG']->getLL('extensions_tables');
-		$markersArray['###LLL:TABLESINTEGRITY###'] = $GLOBALS['LANG']->getLL('extensions_tablesintegrity');
-		$markersArray['###LLL:CONFINTEGRITY###'] = $GLOBALS['LANG']->getLL('extensions_confintegrity');
-		$markersArray['###LLL:FILES###'] = $GLOBALS['LANG']->getLL('extensions_files');
-
 		/********************************* specific developpment(s) *********************************/
-
-		$markersArrayTemp = array();
 
 		if (count($itemsDev) > 0) {
 			foreach ($itemsDev as $itemKey => $itemValue) {
 				if (t3lib_extMgm::isLoaded($itemKey)) {
-					$markersArrayExtension = array();
+					$listExtensionsDevItem = array();
 					$extKey = $itemKey;
 					$extInfo = $itemValue;
 					$fdFile = array();
@@ -435,45 +310,40 @@ class tx_additionalreports_main {
 
 					tx_additionalreports_util::getExtSqlUpdateStatements($extInfo, $dbSchema, $fdFile, $updateStatements);
 
-					$markersArrayExtension['###ICONEXT###'] = tx_additionalreports_util::getExtIcon($extKey);
-					$markersArrayExtension['###EXTENSION###'] = $extKey;
-					$markersArrayExtension['###EXTENSIONLINK###'] = '<a href="#" onclick="' . tx_additionalreports_util::goToModuleEm($extKey) . '">';
-					$markersArrayExtension['###EXTENSIONLINK###'] .= tx_additionalreports_util::getIconZoom() . '</a>';
-					$markersArrayExtension['###VERSION###'] = $itemValue['EM_CONF']['version'];
+					$listExtensionsDevItem['icon'] = tx_additionalreports_util::getExtIcon($extKey);
+					$listExtensionsDevItem['extension'] = $extKey;
+					$listExtensionsDevItem['extensionlink'] = '<a href="#" onclick="' . tx_additionalreports_util::goToModuleEm($extKey) . '">';
+					$listExtensionsDevItem['extensionlink'] .= tx_additionalreports_util::getIconZoom() . '</a>';
+					$listExtensionsDevItem['version'] = $itemValue['EM_CONF']['version'];
 
 					// show db
 					$dumpTf1 = '';
 					$dumpTf2 = '';
 					if (count($fdFile) > 0) {
 						$id = 'sql' . $extKey;
-						$dumpTf1 = count($fdFile) . ' ' . $GLOBALS['LANG']->getLL('extensions_tablesmodified');
+						$dumpTf1 = count($fdFile) . ' ' . self::getLl('extensions_tablesmodified');
 						$dumpTf2 = tx_additionalreports_util::writePopUp($id, $extKey, tx_additionalreports_util::viewArray($fdFile));
 					}
-					$markersArrayExtension['###TABLES###'] = $dumpTf1;
-					$markersArrayExtension['###TABLESLINK###'] = $dumpTf2;
+					$listExtensionsDevItem['tables'] = $dumpTf1;
+					$listExtensionsDevItem['tableslink'] = $dumpTf2;
 
 					// need db update
 					if (count($updateStatements) > 0) {
-						$markersArrayExtension['###TABLESINTEGRITY###'] = '<span style="color:red;font-weight:bold;">' . $GLOBALS['LANG']->getLL('yes') . '</span>';
+						$listExtensionsDevItem['tablesintegrity'] = '<span style="color:red;font-weight:bold;">' . self::getLl('yes') . '</span>';
 					} else {
-						$markersArrayExtension['###TABLESINTEGRITY###'] = $GLOBALS['LANG']->getLL('no');
+						$listExtensionsDevItem['tablesintegrity'] = self::getLl('no');
 					}
 
-					$markersArrayTemp[] = $markersArrayExtension;
+					$listExtensionsDev[] = $listExtensionsDevItem;
 				}
 			}
-			$markersArray['###REPORTS_EXTENSIONS_OBJECTDEV###'] = $template->renderAllTemplate($markersArrayTemp, '###REPORTS_EXTENSIONS_OBJECTDEV###');
-		} else {
-			$markersArray['###REPORTS_EXTENSIONS_OBJECTDEV###'] = $template->renderAllTemplate(array('###NORESULTS###' => $GLOBALS['LANG']->getLL('noresults')), '###REPORTS_EXTENSIONS_NORESULTS###');
 		}
 
 		/********************************* unloaded extension(s) *********************************/
 
-		$markersArrayTemp = array();
-
 		if (count($itemsUnloaded) > 0) {
 			foreach ($itemsUnloaded as $itemKey => $itemValue) {
-				$markersArrayExtension = array();
+				$listExtensionsUnloadedItem = array();
 				$extKey = $itemKey;
 				$extInfo = $itemValue;
 				$fdFile = array();
@@ -481,49 +351,47 @@ class tx_additionalreports_main {
 
 				tx_additionalreports_util::getExtSqlUpdateStatements($extInfo, $dbSchema, $fdFile, $updateStatements);
 
-				$markersArrayExtension['###ICONEXT###'] = tx_additionalreports_util::getExtIcon($extKey);
-				$markersArrayExtension['###EXTENSION###'] = $extKey;
-				$markersArrayExtension['###EXTENSIONLINK###'] = '<a href="#" onclick="' . tx_additionalreports_util::goToModuleEm(
+				$listExtensionsUnloadedItem['icon'] = tx_additionalreports_util::getExtIcon($extKey);
+				$listExtensionsUnloadedItem['extension'] = $extKey;
+				$listExtensionsUnloadedItem['extensionlink'] = '<a href="#" onclick="' . tx_additionalreports_util::goToModuleEm(
 						$extKey
 					) . '">';
-				$markersArrayExtension['###EXTENSIONLINK###'] .= tx_additionalreports_util::getIconZoom() . '</a>';
-				$markersArrayExtension['###VERSION###'] = $itemValue['EM_CONF']['version'];
+				$listExtensionsUnloadedItem['extensionlink'] .= tx_additionalreports_util::getIconZoom() . '</a>';
+				$listExtensionsUnloadedItem['version'] = $itemValue['EM_CONF']['version'];
 
 				// show db
 				$dumpTf1 = '';
 				$dumpTf2 = '';
 				if (count($fdFile) > 0) {
 					$id = 'sql' . $extKey;
-					$dumpTf1 = count($fdFile) . ' ' . $GLOBALS['LANG']->getLL('extensions_tablesmodified');
+					$dumpTf1 = count($fdFile) . ' ' . self::getLl('extensions_tablesmodified');
 					$dumpTf2 = tx_additionalreports_util::writePopUp($id, $extKey, tx_additionalreports_util::viewArray($fdFile));
 				}
-				$markersArrayExtension['###TABLES###'] = $dumpTf1;
-				$markersArrayExtension['###TABLESLINK###'] = $dumpTf2;
+				$listExtensionsUnloadedItem['tables'] = $dumpTf1;
+				$listExtensionsUnloadedItem['tableslink'] = $dumpTf2;
 
-				$markersArrayTemp[] = $markersArrayExtension;
+				$listExtensionsUnloaded[] = $listExtensionsUnloadedItem;
 			}
-			$markersArray['###REPORTS_EXTENSIONS_OBJECTUNLOADED###'] = $template->renderAllTemplate($markersArrayTemp, '###REPORTS_EXTENSIONS_OBJECTUNLOADED###');
-		} else {
-			$markersArray['###REPORTS_EXTENSIONS_OBJECTUNLOADED###'] = $template->renderAllTemplate(
-				array('###NORESULTS###' => $GLOBALS['LANG']->getLL('noresults')), '###REPORTS_EXTENSIONS_NORESULTS###'
-			);
 		}
 
 		$addContent = '';
-		$addContent .= $extensionsLoaded . ' ' . $GLOBALS['LANG']->getLL('extensions_extensions');
+		$addContent .= $extensionsLoaded . ' ' . self::getLl('extensions_extensions');
 		$addContent .= '<br/>';
-		$addContent .= $extensionsLoaded - count($itemsDev) . ' ' . $GLOBALS['LANG']->getLL('extensions_ter');
+		$addContent .= $extensionsLoaded - count($itemsDev) . ' ' . self::getLl('extensions_ter');
 		$addContent .= '  /  ';
-		$addContent .= $extensionsDev . ' ' . $GLOBALS['LANG']->getLL('extensions_dev');
+		$addContent .= $extensionsDev . ' ' . self::getLl('extensions_dev');
 		$addContent .= '<br/>';
-		$addContent .= $extensionsToUpdate . ' ' . $GLOBALS['LANG']->getLL('extensions_toupdate');
+		$addContent .= $extensionsToUpdate . ' ' . self::getLl('extensions_toupdate');
 		$addContent .= '  /  ';
-		$addContent .= $extensionsModified . ' ' . $GLOBALS['LANG']->getLL('extensions_extensionsmodified');
-		$addContentItem = tx_additionalreports_util::writeInformation($GLOBALS['LANG']->getLL('pluginsmode5') . '<br/>' . $GLOBALS['LANG']->getLL('extensions_updateter') . '', $addContent);
+		$addContent .= $extensionsModified . ' ' . self::getLl('extensions_extensionsmodified');
+		$addContentItem = tx_additionalreports_util::writeInformation(self::getLl('pluginsmode5') . '<br/>' . self::getLl('extensions_updateter') . '', $addContent);
 
-		$content = $addContentItem . $template->renderAllTemplate($markersArray, '###REPORTS_EXTENSIONS###');
-
-		return $content;
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/extensions-fluid.html');
+		$view->assign('listExtensionsTer', $listExtensionsTer);
+		$view->assign('listExtensionsDev', $listExtensionsDev);
+		$view->assign('listExtensionsUnloaded', $listExtensionsUnloaded);
+		return $addContentItem . $view->render();
 	}
 
 	/**
@@ -532,43 +400,22 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function displayHooks() {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/hooks.html');
-
-		$markersArray = array();
-		$markersArray['###LLL:TITLE###'] = $GLOBALS['LANG']->getLL('hooks_core');
-		$markersArray['###LLL:COREFILE###'] = $GLOBALS['LANG']->getLL('hooks_corefile');
-		$markersArray['###LLL:NAME###'] = $GLOBALS['LANG']->getLL('hooks_name');
-		$markersArray['###LLL:FILE###'] = $GLOBALS['LANG']->getLL('hooks_file');
-		$markersArray['###LLL:TITLEEXT###'] = $GLOBALS['LANG']->getLL('hooks_extension');
-		$markersArray['###LLL:EXTENSION###'] = $GLOBALS['LANG']->getLL('extension');
-		$markersArray['###LLL:LINE###'] = $GLOBALS['LANG']->getLL('hooks_line');
+		$hooks = array();
 
 		// core hooks
 		$items = $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'];
-
 		if (count($items) > 0) {
-			$markersArrayTemp = array();
 			foreach ($items as $itemKey => $itemValue) {
 				if (preg_match('/.*?\/.*?\.php/', $itemKey, $matches)) {
 					foreach ($itemValue as $hookName => $hookList) {
-						$markersArrayTemp[] = array(
-							'###COREFILE###' => $itemKey,
-							'###NAME###'     => $hookName,
-							'###FILE###'     => tx_additionalreports_util::viewArray($hookList)
+						$hooks['core'][] = array(
+							'corefile' => $itemKey,
+							'name'     => $hookName,
+							'file'     => tx_additionalreports_util::viewArray($hookList)
 						);
 					}
 				}
 			}
-
-			$markersArray['###REPORTS_HOOKS_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_HOOKS_OBJECT###'
-			);
-		} else {
-			$markersArray['###REPORTS_HOOKS_OBJECT###'] = $template->renderAllTemplate(
-				array('###NORESULTS###' => $GLOBALS['LANG']->getLL('noresults')),
-				'###REPORTS_HOOKS_NORESULTS###'
-			);
 		}
 
 		// extension hooks (we read the temp_CACHED and look for $EXTCONF modification)
@@ -594,26 +441,19 @@ class tx_additionalreports_main {
 				fclose($handle);
 			}
 		}
-
 		if (count($items) > 0) {
-			$markersArrayTemp = array();
-			foreach ($items as $itemKey => $itemValue) {
-				$markersArrayTemp[] = array(
-					'###EXTENSION###' => $itemValue[0],
-					'###LINE###'      => $itemValue[1]
+			foreach ($items as $itemValue) {
+				$hooks['extensions'][] = array(
+					'extension' => $itemValue[0],
+					'line'      => $itemValue[1]
 				);
 			}
-			$markersArray['###REPORTS_HOOKS_OBJECTEXT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_HOOKS_OBJECTEXT###'
-			);
-		} else {
-			$markersArray['###REPORTS_HOOKS_OBJECTEXT###'] = $template->renderAllTemplate(
-				array('###NORESULTS###' => $GLOBALS['LANG']->getLL('noresults')),
-				'###REPORTS_HOOKS_NORESULTS###'
-			);
 		}
 
-		return $template->renderAllTemplate($markersArray, '###REPORTS_HOOKS###');
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/hooks-fluid.html');
+		$view->assign('hooks', $hooks);
+		return $view->render();
 	}
 
 	/**
@@ -622,8 +462,8 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function displayStatus() {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/status.html');
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/status-fluid.html');
 
 		// infos about typo3 versions
 		$jsonVersions = tx_additionalreports_util::getJsonVersionInfos();
@@ -631,27 +471,25 @@ class tx_additionalreports_main {
 		$currentBranch = tx_additionalreports_util::getCurrentBranchInfos($jsonVersions);
 		$latestStable = tx_additionalreports_util::getLatestStableInfos($jsonVersions);
 		$latestLts = tx_additionalreports_util::getLatestLtsInfos($jsonVersions);
-		$headerVersions = $GLOBALS['LANG']->getLL('status_version') . '<br/>';
-		$headerVersions .= $GLOBALS['LANG']->getLL('latestbranch') . '<br/>';
-		$headerVersions .= $GLOBALS['LANG']->getLL('lateststable') . '<br/>';
-		$headerVersions .= $GLOBALS['LANG']->getLL('latestlts');
+		$headerVersions = self::getLl('status_version') . '<br/>';
+		$headerVersions .= self::getLl('latestbranch') . '<br/>';
+		$headerVersions .= self::getLl('lateststable') . '<br/>';
+		$headerVersions .= self::getLl('latestlts');
 		$htmlVersions = TYPO3_version . ' [' . $currentVersionInfos['date'] . ']';
 		$htmlVersions .= '<br/>' . $currentBranch['version'] . ' [' . $currentBranch['date'] . ']';
 		$htmlVersions .= '<br/>' . $latestStable['version'] . ' [' . $latestStable['date'] . ']';
 		$htmlVersions .= '<br/>' . $latestLts['version'] . ' [' . $latestLts['date'] . ']';
 
-		$markersArray = array();
-
 		// TYPO3
-		$content = tx_additionalreports_util::writeInformation($GLOBALS['LANG']->getLL('status_sitename'), $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']);
+		$content = tx_additionalreports_util::writeInformation(self::getLl('status_sitename'), $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']);
 		$content .= tx_additionalreports_util::writeInformation($headerVersions, $htmlVersions);
-		$content .= tx_additionalreports_util::writeInformation($GLOBALS['LANG']->getLL('status_path'), PATH_site);
+		$content .= tx_additionalreports_util::writeInformation(self::getLl('status_path'), PATH_site);
 		$content .= tx_additionalreports_util::writeInformation('TYPO3_db<br/>TYPO3_db_username<br/>TYPO3_db_host', TYPO3_db . '<br/>' . TYPO3_db_username . '<br/>' . TYPO3_db_host);
 		if ($GLOBALS['TYPO3_CONF_VARS']['GFX']['im_path'] != '') {
 			$cmd = t3lib_div::imageMagickCommand('convert', '-version');
 			exec($cmd, $ret);
 			$content .= tx_additionalreports_util::writeInformation(
-				$GLOBALS['LANG']->getLL('status_im'), $GLOBALS['TYPO3_CONF_VARS']['GFX']['im_path'] . ' (' . $ret[0] . ')'
+				self::getLl('status_im'), $GLOBALS['TYPO3_CONF_VARS']['GFX']['im_path'] . ' (' . $ret[0] . ')'
 			);
 		}
 		$content .= tx_additionalreports_util::writeInformation(
@@ -675,13 +513,13 @@ class tx_additionalreports_main {
 			$extensions[$aKey] = $extension . ' (' . tx_additionalreports_util::getExtensionVersion($extension) . ')';
 		}
 		$content .= tx_additionalreports_util::writeInformationList(
-			$GLOBALS['LANG']->getLL('status_loadedextensions'), $extensions
+			self::getLl('status_loadedextensions'), $extensions
 		);
 
-		$markersArray['###TYPO3###'] = $content;
+		$view->assign('typo3', $content);
 
 		// PHP
-		$content = tx_additionalreports_util::writeInformation($GLOBALS['LANG']->getLL('status_version'), phpversion());
+		$content = tx_additionalreports_util::writeInformation(self::getLl('status_version'), phpversion());
 		$content .= tx_additionalreports_util::writeInformation('memory_limit', ini_get('memory_limit'));
 		$content .= tx_additionalreports_util::writeInformation('max_execution_time', ini_get('max_execution_time'));
 		$content .= tx_additionalreports_util::writeInformation('post_max_size', ini_get('post_max_size'));
@@ -701,23 +539,24 @@ class tx_additionalreports_main {
 		$extensions = array_map('strtolower', get_loaded_extensions());
 		natcasesort($extensions);
 		$content .= tx_additionalreports_util::writeInformationList(
-			$GLOBALS['LANG']->getLL('status_loadedextensions'), $extensions
+			self::getLl('status_loadedextensions'), $extensions
 		);
-		$markersArray['###PHP###'] = $content;
+
+		$view->assign('php', $content);
 
 		// Apache
 		if (function_exists('apache_get_version') && function_exists('apache_get_modules')) {
 			$extensions = apache_get_modules();
 			natcasesort($extensions);
 			$content = tx_additionalreports_util::writeInformation(
-				$GLOBALS['LANG']->getLL('status_version'), apache_get_version()
+				self::getLl('status_version'), apache_get_version()
 			);
 			$content .= tx_additionalreports_util::writeInformationList(
-				$GLOBALS['LANG']->getLL('status_loadedextensions'), $extensions
+				self::getLl('status_loadedextensions'), $extensions
 			);
-			$markersArray['###APACHE###'] = $content;
+			$view->assign('apache', $content);
 		} else {
-			$markersArray['###APACHE###'] = $GLOBALS['LANG']->getLL('noresults');
+			$view->assign('apache', self::getLl('noresults'));
 		}
 
 		// MySQL
@@ -731,12 +570,8 @@ class tx_additionalreports_main {
 			'default_character_set_name', $items[0]['default_character_set_name']
 		);
 		$content .= tx_additionalreports_util::writeInformation('default_collation_name', $items[0]['default_collation_name']);
-		$content .= tx_additionalreports_util::writeInformation(
-			'query_cache', tx_additionalreports_util::getMySqlCacheInformations()
-		);
-		$content .= tx_additionalreports_util::writeInformation(
-			'character_set', tx_additionalreports_util::getMySqlCharacterSet()
-		);
+		$content .= tx_additionalreports_util::writeInformation('query_cache', tx_additionalreports_util::getMySqlCacheInformations());
+		$content .= tx_additionalreports_util::writeInformation('character_set', tx_additionalreports_util::getMySqlCharacterSet());
 
 		// TYPO3 database
 		$items = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
@@ -745,32 +580,28 @@ class tx_additionalreports_main {
 			'table_schema = \'' . TYPO3_db . '\'', '', 'table_name'
 		);
 
-		$markersTablesList = array();
-		$markersTablesListObj = array();
-		$markersTablesList['###TITLE###'] = TYPO3_db . ' - ' . count($items) . ' tables';
+		$tables = array();
 		$size = 0;
 
-		foreach ($items as $itemKey => $itemValue) {
-			$markersTablesListObj[] = array(
-				'###NAME###'      => $itemValue['table_name'],
-				'###ENGINE###'    => $itemValue['engine'],
-				'###COLLATION###' => $itemValue['table_collation'],
-				'###ROWS###'      => $itemValue['table_rows'],
-				'###SIZE###'      => round($itemValue['size'], 2),
+		foreach ($items as $itemValue) {
+			$tables[] = array(
+				'name'      => $itemValue['table_name'],
+				'engine'    => $itemValue['engine'],
+				'collation' => $itemValue['table_collation'],
+				'rows'      => $itemValue['table_rows'],
+				'size'      => round($itemValue['size'], 2),
 			);
 			$size += round($itemValue['size'], 2);
 		}
 
-		$markersTablesList['###TABLESLIST_OBJECT###'] = $template->renderAllTemplate(
-			$markersTablesListObj, '###TABLESLIST_OBJECT###'
-		);
-		$markersTablesList['###TOTALSIZE###'] = round($size, 2);
-		$content .= $template->renderAllTemplate($markersTablesList, '###TABLESLIST###');
-		$markersArray['###MYSQL###'] = $content;
+		$view->assign('mysql', $content);
+		$view->assign('tables', $tables);
+		$view->assign('tablessize', round($size, 2));
+		$view->assign('typo3db', TYPO3_db);
 
 		// Crontab
 		exec('crontab -l', $crontab);
-		$crontabString = $GLOBALS['LANG']->getLL('status_nocrontab');
+		$crontabString = self::getLl('status_nocrontab');
 		if (count($crontab) > 0) {
 			$crontabString = '';
 			foreach ($crontab as $cron) {
@@ -780,9 +611,9 @@ class tx_additionalreports_main {
 			}
 		}
 		$content = tx_additionalreports_util::writeInformation('Crontab', $crontabString);
-		$markersArray['###CRONTAB###'] = $content;
+		$view->assign('crontab', $content);
 
-		return $template->renderAllTemplate($markersArray, '###REPORTS_STATUS###');
+		return $view->render();
 	}
 
 	/**
@@ -791,58 +622,51 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function displayPlugins() {
-		$url = $this->baseURL;
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/plugins-fluid.html');
 
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/plugins.html');
+		$view->assign('url', tx_additionalreports_util::getBaseUrl());
+		$view->assign('caution', tx_additionalreports_util::writeInformation(self::getLl('careful'), self::getLl('carefuldesc')));
+		$view->assign('checkedpluginsmode3', (tx_additionalreports_util::getPluginsDisplayMode() == 3) ? ' checked="checked"' : '');
+		$view->assign('checkedpluginsmode4', (tx_additionalreports_util::getPluginsDisplayMode() == 4) ? ' checked="checked"' : '');
+		$view->assign('checkedpluginsmode5', (tx_additionalreports_util::getPluginsDisplayMode() == 5) ? ' checked="checked"' : '');
+		$view->assign('checkedpluginsmode6', (tx_additionalreports_util::getPluginsDisplayMode() == 6) ? ' checked="checked"' : '');
+		$view->assign('checkedpluginsmode7', (tx_additionalreports_util::getPluginsDisplayMode() == 7) ? ' checked="checked"' : '');
 
-		$markersArray = array();
-		$markersArray['###URL###'] = $url;
-
-		$markersArray['###CHECKEDPLUGINSMODE3###'] = ($this->display == 3) ? ' checked="checked"' : '';
-		$markersArray['###LLL:MODE3###'] = $GLOBALS['LANG']->getLL('pluginsmode3');
-
-		$markersArray['###CHECKEDPLUGINSMODE4###'] = ($this->display == 4) ? ' checked="checked"' : '';
-		$markersArray['###LLL:MODE4###'] = $GLOBALS['LANG']->getLL('pluginsmode4');
-
-		$markersArray['###CHECKEDPLUGINSMODE5###'] = ($this->display == 5) ? ' checked="checked"' : '';
-		$markersArray['###LLL:MODE5###'] = $GLOBALS['LANG']->getLL('pluginsmode5');
-
-		$markersArray['###CHECKEDPLUGINSMODE6###'] = ($this->display == 6) ? ' checked="checked"' : '';
-		$markersArray['###LLL:MODE6###'] = $GLOBALS['LANG']->getLL('pluginsmode4hidden');
-
-		$markersArray['###CHECKEDPLUGINSMODE7###'] = ($this->display == 7) ? ' checked="checked"' : '';
-		$markersArray['###LLL:MODE7###'] = $GLOBALS['LANG']->getLL('pluginsmode3hidden');
-
-		$markersArray['###LLL:CAUTION###'] = tx_additionalreports_util::writeInformation(
-			$GLOBALS['LANG']->getLL('careful'),
-			$GLOBALS['LANG']->getLL('carefuldesc')
-		);
-
-		$content = $template->renderAllTemplate($markersArray, '###REPORTS_PLUGINS_MENU###');
-
-		switch ($this->display) {
+		switch (tx_additionalreports_util::getPluginsDisplayMode()) {
 			case 3 :
-				$content .= self::getAllUsedCtypes();
+				$view->assign('filtersCat', tx_additionalreports_util::getAllDifferentCtypesSelect(FALSE));
+				$view->assign('items', self::getAllUsedCtypes());
 				break;
 			case 4 :
-				$content .= self::getAllUsedPlugins();
+				$view->assign('filtersCat', tx_additionalreports_util::getAllDifferentPluginsSelect(FALSE));
+				$view->assign('items', self::getAllUsedPlugins());
 				break;
 			case 5 :
-				$content .= self::getSummary();
+				$view->assign('items', self::getSummary());
 				break;
 			case 6 :
-				$content .= self::getAllUsedPlugins(TRUE);
+				$view->assign('filtersCat', tx_additionalreports_util::getAllDifferentPluginsSelect(TRUE));
+				$view->assign('items', self::getAllUsedPlugins(TRUE));
 				break;
 			case 7 :
-				$content .= self::getAllUsedCtypes(TRUE);
+				$view->assign('filtersCat', tx_additionalreports_util::getAllDifferentCtypesSelect(TRUE));
+				$view->assign('items', self::getAllUsedCtypes(TRUE));
 				break;
 			default:
-				$content .= self::getSummary();
+				$view->assign('items', self::getSummary());
 				break;
 		}
 
-		return $content;
+		$view->assign('display', tx_additionalreports_util::getPluginsDisplayMode());
+
+		if (t3lib_extMgm::isLoaded('templavoila') && class_exists('tx_templavoila_api')) {
+			$view->assign('tvused', TRUE);
+		} else {
+			$view->assign('tvused', FALSE);
+		}
+
+		return $view->render();
 	}
 
 	/**
@@ -852,9 +676,8 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function getAllUsedPlugins($displayHidden = FALSE) {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/plugins.html');
-		$markersArray = array();
+
+		$allItems = array();
 
 		$plugins = array();
 		$getFiltersCat = t3lib_div::_GP('filtersCat');
@@ -867,188 +690,33 @@ class tx_additionalreports_main {
 
 		$addhidden = ($displayHidden === TRUE) ? '' : ' AND tt_content.hidden=0 AND pages.hidden=0 ';
 		$addWhere = (($getFiltersCat !== NULL) && ($getFiltersCat != 'all')) ? ' AND tt_content.list_type=\'' . $getFiltersCat . '\'' : '';
-
-		// html select cat
-		$this->filtersCat .= tx_additionalreports_util::getAllDifferentPluginsSelect($addhidden, $getFiltersCat);
-
-		// All items
 		$items = tx_additionalreports_util::getAllPlugins($addhidden . $addWhere);
 
-		// Page browser
-		$pointer = t3lib_div::_GP('pointer');
-		$limit = ($pointer !== NULL) ? $pointer . ',' . $this->nbElementsPerPage : '0,' . $this->nbElementsPerPage;
-		$current = ($pointer !== NULL) ? intval($pointer) : 0;
-		$pageBrowser = self::pluginsRenderListNavigation(count($items), $this->nbElementsPerPage, $current);
-		$itemsBrowser = tx_additionalreports_util::getAllPlugins($addhidden . $addWhere, $limit);
-
-		$markersArray['###PAGEBROWSER###'] = $pageBrowser;
-		$markersArray['###LLL:TITLE###'] = $GLOBALS['LANG']->getLL('pluginsmode4');
-		$markersArray['###LLL:EXTENSION###'] = $GLOBALS['LANG']->getLL('extension');
-		$markersArray['###LLL:PLUGIN###'] = $GLOBALS['LANG']->getLL('plugin');
-		$markersArray['###LLL:DOMAIN###'] = $GLOBALS['LANG']->getLL('domain');
-		$markersArray['###LLL:PID###'] = $GLOBALS['LANG']->getLL('pid');
-		$markersArray['###LLL:UID###'] = $GLOBALS['LANG']->getLL('uid');
-		$markersArray['###LLL:PAGETITLE###'] = $GLOBALS['LANG']->getLL('pagetitle');
-		$markersArray['###LLL:USEDTV###'] = $GLOBALS['LANG']->getLL('tvused');
-		$markersArray['###LLL:PREVIEW###'] = $GLOBALS['LANG']->getLL('preview');
-
-		if (t3lib_extMgm::isLoaded('templavoila') && class_exists('tx_templavoila_api')) {
-			$markersArray['###LLL:PAGE###'] = 'Page TV';
-
-		} else {
-			$markersArray['###LLL:PAGE###'] = 'Page';
-		}
-
-		$markersArrayTemp = array();
-
-		foreach ($itemsBrowser as $itemKey => $itemValue) {
+		foreach ($items as $itemKey => $itemValue) {
 			$markersExt = array();
 			preg_match('/EXT:(.*?)\//', $plugins[$itemValue['list_type']][0], $ext);
 			preg_match('/^LLL:(EXT:.*?):(.*)/', $plugins[$itemValue['list_type']][0], $llfile);
 			$localLang = t3lib_div::readLLfile($llfile[1], $GLOBALS['LANG']->lang);
-			$domain = tx_additionalreports_util::getDomain($itemValue['pid']);
 
 			if ($plugins[trim($ext[1])]) {
-				$markersExt['###ICONEXT###'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . $plugins[trim($ext[1])][2];
+				$markersExt['iconext'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . $plugins[trim($ext[1])][2];
 			} else {
 				if ($ext) {
-					$markersExt['###ICONEXT###'] = tx_additionalreports_util::getExtIcon($ext[1]);
+					$markersExt['iconext'] = tx_additionalreports_util::getExtIcon($ext[1]);
 				} else {
-					$markersExt['###ICONEXT###'] = '';
+					$markersExt['iconext'] = '';
 				}
 			}
 
-			$markersExt['###EXTENSION###'] = $ext[1];
-			$markersExt['###PLUGIN###'] = $GLOBALS['LANG']->getLLL(
-					$llfile[2], $localLang
-				) . ' (' . $itemValue['list_type'] . ')';
-			$markersExt['###DOMAIN###'] = tx_additionalreports_util::getIconDomain() . $domain;
+			$markersExt['extension'] = $ext[1];
+			$markersExt['plugin'] = $GLOBALS['LANG']->getLLL($llfile[2], $localLang) . ' (' . $itemValue['list_type'] . ')';
 
-			$iconPage = ($itemValue['hiddenpages'] == 0)
-				? tx_additionalreports_util::getIconPage()
-				: tx_additionalreports_util::getIconPage(TRUE);
-			$iconContent = ($itemValue['hiddentt_content'] == 0)
-				? tx_additionalreports_util::getIconContent()
-				: tx_additionalreports_util::getIconContent(TRUE);
+			$markersExt = array_merge($markersExt, self::getContentInfos($itemValue));
 
-			$markersExt['###PID###'] = $iconPage . ' ' . $itemValue['pid'];
-			$markersExt['###UID###'] = $iconContent . ' ' . $itemValue['uid'];
-			$markersExt['###PAGETITLE###'] = $itemValue['title'];
-
-			if (t3lib_extMgm::isLoaded('templavoila') && class_exists('tx_templavoila_api')) {
-
-				$linkAtt = array(
-					'href'    => '#',
-					'title'   => $GLOBALS['LANG']->getLL('switch'),
-					'onclick' => tx_additionalreports_util::goToModuleList($itemValue['pid'])
-				);
-
-				$markersExt['###DB###'] = tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebList()
-				);
-
-				$linkAtt = array(
-					'href'   => tx_additionalreports_util::goToModuleList($itemValue['pid'], TRUE),
-					'target' => '_blank',
-					'title'  => $GLOBALS['LANG']->getLL('newwindow')
-				);
-
-				$markersExt['###DB###'] .= tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebList()
-				);
-
-				$linkAtt = array(
-					'href'    => '#',
-					'title'   => $GLOBALS['LANG']->getLL('switch'),
-					'onclick' => tx_additionalreports_util::goToModulePageTv($itemValue['pid'])
-				);
-
-				$markersExt['###PAGE###'] = tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebPage()
-				);
-
-				$linkAtt = array(
-					'href'   => tx_additionalreports_util::goToModulePageTv($itemValue['pid'], TRUE),
-					'target' => '_blank',
-					'title'  => $GLOBALS['LANG']->getLL('newwindow')
-				);
-
-				$markersExt['###PAGE###'] .= tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebPage()
-				);
-
-				if (tx_additionalreports_util::isUsedInTv($itemValue['uid'], $itemValue['pid'])) {
-					$markersExt['###USEDTV###'] = $GLOBALS['LANG']->getLL('yes');
-					$markersExt['###USEDTVCLASS###'] = ' typo3-message message-ok';
-				} else {
-					$markersExt['###USEDTV###'] = $GLOBALS['LANG']->getLL('no');
-					$markersExt['###USEDTVCLASS###'] = ' typo3-message message-error';
-				}
-			} else {
-				$markersExt['###USEDTV###'] = '';
-				$markersExt['###USEDTVCLASS###'] = '';
-				$markersArray['###DISPLAY_USEDTV###'] = '';
-				$markersExt['###DISPLAY_USEDTV###'] = '';
-
-				$linkAtt = array(
-					'href'    => '#',
-					'title'   => $GLOBALS['LANG']->getLL('switch'),
-					'onclick' => tx_additionalreports_util::goToModuleList($itemValue['pid'])
-				);
-
-				$markersExt['###DB###'] = tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebList()
-				);
-
-				$linkAtt = array(
-					'href'   => tx_additionalreports_util::goToModuleList($itemValue['pid'], TRUE),
-					'target' => '_blank',
-					'title'  => $GLOBALS['LANG']->getLL('newwindow')
-				);
-
-				$markersExt['###DB###'] .= tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebList()
-				);
-
-				$linkAtt = array(
-					'href'    => '#',
-					'title'   => $GLOBALS['LANG']->getLL('switch'),
-					'onclick' => tx_additionalreports_util::goToModulePage($itemValue['pid'])
-				);
-
-				$markersExt['###PAGE###'] = tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebPage()
-				);
-
-				$linkAtt = array(
-					'href'   => tx_additionalreports_util::goToModulePage($itemValue['pid'], TRUE),
-					'target' => '_blank',
-					'title'  => $GLOBALS['LANG']->getLL('newwindow')
-				);
-
-				$markersExt['###PAGE###'] .= tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebPage()
-				);
-			}
-
-			$markersExt['###PREVIEW###'] = '<a target="_blank" href="http://' . $domain . '/index.php?id=' . $itemValue['pid'] . '">';
-			$markersExt['###PREVIEW###'] .= tx_additionalreports_util::getIconZoom();
-			$markersExt['###PREVIEW###'] .= '</a>';
-
-			$markersArrayTemp[] = $markersExt;
+			$allItems[] = $markersExt;
 		}
 
-		if (!empty($markersArrayTemp)) {
-			$markersArray['###REPORTS_PLUGINS_USEDPLUGINS_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_PLUGINS_USEDPLUGINS_OBJECT###'
-			);
-		} else {
-			return $markersArray['###PAGEBROWSER###'];
-		}
-
-		$content = $template->renderAllTemplate($markersArray, '###REPORTS_PLUGINS_USEDPLUGINS###');
-
-		return $content;
+		return $allItems;
 	}
 
 	/**
@@ -1058,14 +726,13 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function getAllUsedCtypes($displayHidden = FALSE) {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/plugins.html');
-		$markersArray = array();
+
+		$allItems = array();
 
 		$ctypes = array();
 		$getFiltersCat = t3lib_div::_GP('filtersCat');
 
-		foreach ($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] as $itemKey => $itemValue) {
+		foreach ($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] as $itemValue) {
 			if ($itemValue[1] != '--div--') {
 				$ctypes[$itemValue[1]] = $itemValue;
 			}
@@ -1073,184 +740,95 @@ class tx_additionalreports_main {
 
 		$addhidden = ($displayHidden === TRUE) ? '' : ' AND tt_content.hidden=0 AND pages.hidden=0 ';
 		$addWhere = (($getFiltersCat !== NULL) && ($getFiltersCat != 'all')) ? ' AND tt_content.CType=\'' . $getFiltersCat . '\'' : '';
-
-		// html select cat
-		$this->filtersCat .= tx_additionalreports_util::getAllDifferentCtypesSelect($addhidden, $getFiltersCat);
-
-		// All items
 		$items = tx_additionalreports_util::getAllCtypes($addhidden . $addWhere);
 
-		// Page browser
-		$pointer = t3lib_div::_GP('pointer');
-		$limit = ($pointer !== NULL) ? $pointer . ',' . $this->nbElementsPerPage : '0,' . $this->nbElementsPerPage;
-		$current = ($pointer !== NULL) ? intval($pointer) : 0;
-		$pageBrowser = self::pluginsRenderListNavigation(count($items), $this->nbElementsPerPage, $current);
-		$itemsBrowser = tx_additionalreports_util::getAllCtypes($addhidden . $addWhere, $limit);
-
-		$markersArray['###PAGEBROWSER###'] = $pageBrowser;
-		$markersArray['###LLL:TITLE###'] = $GLOBALS['LANG']->getLL('pluginsmode3');
-		$markersArray['###LLL:CTYPE###'] = $GLOBALS['LANG']->getLL('ctype');
-		$markersArray['###LLL:DOMAIN###'] = $GLOBALS['LANG']->getLL('domain');
-		$markersArray['###LLL:PID###'] = $GLOBALS['LANG']->getLL('pid');
-		$markersArray['###LLL:UID###'] = $GLOBALS['LANG']->getLL('uid');
-		$markersArray['###LLL:PAGETITLE###'] = $GLOBALS['LANG']->getLL('pagetitle');
-		$markersArray['###LLL:USEDTV###'] = $GLOBALS['LANG']->getLL('tvused');
-		$markersArray['###LLL:PREVIEW###'] = $GLOBALS['LANG']->getLL('preview');
-
-		if (t3lib_extMgm::isLoaded('templavoila') && class_exists('tx_templavoila_api')) {
-			$markersArray['###LLL:PAGE###'] = 'Page TV';
-		} else {
-			$markersArray['###LLL:PAGE###'] = 'Page';
-		}
-
-		$markersArrayTemp = array();
-
-		foreach ($itemsBrowser as $itemKey => $itemValue) {
+		foreach ($items as $itemKey => $itemValue) {
 			$markersExt = array();
 			preg_match('/^LLL:(EXT:.*?):(.*)/', $ctypes[$itemValue['CType']][0], $llfile);
 			$localLang = t3lib_div::readLLfile($llfile[1], $GLOBALS['LANG']->lang);
-			$domain = tx_additionalreports_util::getDomain($itemValue['pid']);
 
 			if ($ctypes[$itemValue['CType']][2] != '') {
 				if (is_file(PATH_site . 'typo3/sysext/t3skin/icons/gfx/' . $ctypes[$itemValue['CType']][2])) {
-					$markersExt['###ICONEXT###'] = t3lib_div::getIndpEnv(
-							'TYPO3_REQUEST_DIR'
-						) . 'sysext/t3skin/icons/gfx/' . $ctypes[$itemValue['CType']][2];
+					$markersExt['iconext'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . 'sysext/t3skin/icons/gfx/' . $ctypes[$itemValue['CType']][2];
 				} elseif (preg_match('/^\.\./', $ctypes[$itemValue['CType']][2], $temp)) {
-					$markersExt['###ICONEXT###'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . $ctypes[$itemValue['CType']][2];
+					$markersExt['iconext'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . $ctypes[$itemValue['CType']][2];
 				} elseif (preg_match('/^EXT:(.*)$/', $ctypes[$itemValue['CType']][2], $temp)) {
-					$markersExt['###ICONEXT###'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . '../typo3conf/ext/' . $temp[1];
+					$markersExt['iconext'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . '../typo3conf/ext/' . $temp[1];
 				}
 			}
 
-			$markersExt['###CTYPE###'] = $GLOBALS['LANG']->getLLL($llfile[2], $localLang) . ' (' . $itemValue['CType'] . ')';
-			$markersExt['###DOMAIN###'] = tx_additionalreports_util::getIconDomain() . $domain;
+			$markersExt['ctype'] = $GLOBALS['LANG']->getLLL($llfile[2], $localLang) . ' (' . $itemValue['CType'] . ')';
 
-			$iconPage = ($itemValue['hiddenpages'] == 0)
-				? tx_additionalreports_util::getIconPage()
-				: tx_additionalreports_util::getIconPage(TRUE);
-			$iconContent = ($itemValue['hiddentt_content'] == 0)
-				? tx_additionalreports_util::getIconContent()
-				: tx_additionalreports_util::getIconContent(TRUE);
+			$markersExt = array_merge($markersExt, self::getContentInfos($itemValue));
 
-			$markersExt['###PID###'] = $iconPage . ' ' . $itemValue['pid'];
-			$markersExt['###UID###'] = $iconContent . ' ' . $itemValue['uid'];
-			$markersExt['###PAGETITLE###'] = $itemValue['title'];
+			$allItems[] = $markersExt;
+		}
 
-			if (t3lib_extMgm::isLoaded('templavoila') && class_exists('tx_templavoila_api')) {
+		return $allItems;
+	}
 
-				$linkAtt = array(
-					'href'    => '#',
-					'title'   => $GLOBALS['LANG']->getLL('switch'),
-					'onclick' => tx_additionalreports_util::goToModuleList($itemValue['pid'])
-				);
+	/**
+	 * Return informations about a ctype or plugin
+	 *
+	 * @param array $itemValue
+	 * @return array
+	 */
+	public function getContentInfos($itemValue) {
+		$markersExt = array();
 
-				$markersExt['###DB###'] = tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebList()
-				);
+		$domain = tx_additionalreports_util::getDomain($itemValue['pid']);
+		$markersExt['domain'] = tx_additionalreports_util::getIconDomain() . $domain;
 
-				$linkAtt = array(
-					'href'   => tx_additionalreports_util::goToModuleList($itemValue['pid'], TRUE),
-					'target' => '_blank',
-					'title'  => $GLOBALS['LANG']->getLL('newwindow')
-				);
+		$iconPage = ($itemValue['hiddenpages'] == 0) ? tx_additionalreports_util::getIconPage() : tx_additionalreports_util::getIconPage(TRUE);
+		$iconContent = ($itemValue['hiddentt_content'] == 0) ? tx_additionalreports_util::getIconContent() : tx_additionalreports_util::getIconContent(TRUE);
 
-				$markersExt['###DB###'] .= tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebList()
-				);
+		$markersExt['pid'] = $iconPage . ' ' . $itemValue['pid'];
+		$markersExt['uid'] = $iconContent . ' ' . $itemValue['uid'];
+		$markersExt['pagetitle'] = $itemValue['title'];
 
-				$linkAtt = array(
-					'href'    => '#',
-					'title'   => $GLOBALS['LANG']->getLL('switch'),
-					'onclick' => tx_additionalreports_util::goToModulePageTv($itemValue['pid'])
-				);
+		if (t3lib_extMgm::isLoaded('templavoila') && class_exists('tx_templavoila_api')) {
 
-				$markersExt['###PAGE###'] = tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebPage()
-				);
+			$linkAtt = array('href' => '#', 'title' => self::getLl('switch'), 'onclick' => tx_additionalreports_util::goToModuleList($itemValue['pid']));
+			$markersExt['db'] = tx_additionalreports_util::generateLink($linkAtt, tx_additionalreports_util::getIconWebList());
 
-				$linkAtt = array(
-					'href'   => tx_additionalreports_util::goToModulePageTv($itemValue['pid'], TRUE),
-					'target' => '_blank',
-					'title'  => $GLOBALS['LANG']->getLL('newwindow')
-				);
+			$linkAtt = array('href' => tx_additionalreports_util::goToModuleList($itemValue['pid'], TRUE), 'target' => '_blank', 'title' => self::getLl('newwindow'));
+			$markersExt['db'] .= tx_additionalreports_util::generateLink($linkAtt, tx_additionalreports_util::getIconWebList());
 
-				$markersExt['###PAGE###'] .= tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebPage()
-				);
+			$linkAtt = array('href' => '#', 'title' => self::getLl('switch'), 'onclick' => tx_additionalreports_util::goToModulePageTv($itemValue['pid']));
+			$markersExt['page'] = tx_additionalreports_util::generateLink($linkAtt, tx_additionalreports_util::getIconWebPage());
 
-				if (tx_additionalreports_util::isUsedInTv($itemValue['uid'], $itemValue['pid'])) {
-					$markersExt['###USEDTV###'] = $GLOBALS['LANG']->getLL('yes');
-					$markersExt['###USEDTVCLASS###'] = ' typo3-message message-ok';
-				} else {
-					$markersExt['###USEDTV###'] = $GLOBALS['LANG']->getLL('no');
-					$markersExt['###USEDTVCLASS###'] = ' typo3-message message-error';
-				}
+			$linkAtt = array('href' => tx_additionalreports_util::goToModulePageTv($itemValue['pid'], TRUE), 'target' => '_blank', 'title' => self::getLl('newwindow'));
+			$markersExt['page'] .= tx_additionalreports_util::generateLink($linkAtt, tx_additionalreports_util::getIconWebPage());
+
+			if (tx_additionalreports_util::isUsedInTv($itemValue['uid'], $itemValue['pid'])) {
+				$markersExt['usedtv'] = self::getLl('yes');
+				$markersExt['usedtvclass'] = ' typo3-message message-ok';
 			} else {
-				$markersExt['###USEDTV###'] = '';
-				$markersExt['###USEDTVCLASS###'] = '';
-				$markersArray['###DISPLAY_USEDTV###'] = '';
-				$markersExt['###DISPLAY_USEDTV###'] = '';
-
-				$linkAtt = array(
-					'href'    => '#',
-					'title'   => $GLOBALS['LANG']->getLL('switch'),
-					'onclick' => tx_additionalreports_util::goToModuleList($itemValue['pid'])
-				);
-
-				$markersExt['###DB###'] = tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebList()
-				);
-
-				$linkAtt = array(
-					'href'   => tx_additionalreports_util::goToModuleList($itemValue['pid'], TRUE),
-					'target' => '_blank',
-					'title'  => $GLOBALS['LANG']->getLL('newwindow')
-				);
-
-				$markersExt['###DB###'] .= tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebList()
-				);
-
-				$linkAtt = array(
-					'href'    => '#',
-					'title'   => $GLOBALS['LANG']->getLL('switch'),
-					'onclick' => tx_additionalreports_util::goToModulePage($itemValue['pid'])
-				);
-
-				$markersExt['###PAGE###'] = tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebPage()
-				);
-
-				$linkAtt = array(
-					'href'   => tx_additionalreports_util::goToModulePage($itemValue['pid'], TRUE),
-					'target' => '_blank',
-					'title'  => $GLOBALS['LANG']->getLL('newwindow')
-				);
-
-				$markersExt['###PAGE###'] .= tx_additionalreports_util::generateLink(
-					$linkAtt, tx_additionalreports_util::getIconWebPage()
-				);
+				$markersExt['usedtv'] = self::getLl('no');
+				$markersExt['usedtvclass'] = ' typo3-message message-error';
 			}
-
-			$markersExt['###PREVIEW###'] = '<a target="_blank" href="http://' . $domain . '/index.php?id=' . $itemValue['pid'] . '">';
-			$markersExt['###PREVIEW###'] .= tx_additionalreports_util::getIconZoom();
-			$markersExt['###PREVIEW###'] .= '</a>';
-
-			$markersArrayTemp[] = $markersExt;
-		}
-
-		if (!empty($markersArrayTemp)) {
-			$markersArray['###REPORTS_PLUGINS_USEDCTYPES_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_PLUGINS_USEDCTYPES_OBJECT###'
-			);
 		} else {
-			return $markersArray['###PAGEBROWSER###'];
+			$markersExt['usedtv'] = '';
+			$markersExt['usedtvclass'] = '';
+
+			$linkAtt = array('href' => '#', 'title' => self::getLl('switch'), 'onclick' => tx_additionalreports_util::goToModuleList($itemValue['pid']));
+			$markersExt['db'] = tx_additionalreports_util::generateLink($linkAtt, tx_additionalreports_util::getIconWebList());
+
+			$linkAtt = array('href' => tx_additionalreports_util::goToModuleList($itemValue['pid'], TRUE), 'target' => '_blank', 'title' => self::getLl('newwindow'));
+			$markersExt['db'] .= tx_additionalreports_util::generateLink($linkAtt, tx_additionalreports_util::getIconWebList());
+
+			$linkAtt = array('href' => '#', 'title' => self::getLl('switch'), 'onclick' => tx_additionalreports_util::goToModulePage($itemValue['pid']));
+			$markersExt['page'] = tx_additionalreports_util::generateLink($linkAtt, tx_additionalreports_util::getIconWebPage());
+
+			$linkAtt = array('href' => tx_additionalreports_util::goToModulePage($itemValue['pid'], TRUE), 'target' => '_blank', 'title' => self::getLl('newwindow'));
+			$markersExt['page'] .= tx_additionalreports_util::generateLink($linkAtt, tx_additionalreports_util::getIconWebPage());
 		}
 
-		$content = $template->renderAllTemplate($markersArray, '###REPORTS_PLUGINS_USEDCTYPES###');
+		$markersExt['preview'] = '<a target="_blank" href="http://' . $domain . '/index.php?id=' . $itemValue['pid'] . '">';
+		$markersExt['preview'] .= tx_additionalreports_util::getIconZoom();
+		$markersExt['preview'] .= '</a>';
 
-		return $content;
+		return $markersExt;
 	}
 
 	/**
@@ -1259,9 +837,6 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function getSummary() {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/plugins.html');
-		$markersArray = array();
 
 		$plugins = array();
 		foreach ($GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] as $itemKey => $itemValue) {
@@ -1292,189 +867,40 @@ class tx_additionalreports_main {
 			'nb DESC'
 		);
 
-
-		$markersArray['###LLL:TITLE###'] = $GLOBALS['LANG']->getLL('pluginsmode5');
-		$markersArray['###LLL:CONTENT###'] = $GLOBALS['LANG']->getLL('content');
-		$markersArray['###LLL:REFERENCES###'] = $GLOBALS['LANG']->getLL('references');
-
-		$markersArrayTemp = array();
+		$allItems = array();
 
 		foreach ($items as $itemKey => $itemValue) {
-			$markersTemp = array();
-
+			$itemTemp = array();
 			if ($itemValue['CType'] == 'list') {
 				preg_match('/EXT:(.*?)\//', $plugins[$itemValue['list_type']][0], $ext);
 				preg_match('/^LLL:(EXT:.*?):(.*)/', $plugins[$itemValue['list_type']][0], $llfile);
 				$localLang = t3lib_div::readLLfile($llfile[1], $GLOBALS['LANG']->lang);
 				if ($plugins[$itemValue['list_type']][2]) {
-					$markersTemp['###ICONEXT###'] = t3lib_div::getIndpEnv(
-							'TYPO3_REQUEST_DIR'
-						) . $plugins[$itemValue['list_type']][2];
+					$itemTemp['iconext'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . $plugins[$itemValue['list_type']][2];
 				} else {
-					$markersTemp['###ICONEXT###'] = '';
+					$itemTemp['iconext'] = '';
 				}
-				$markersTemp['###CONTENT###'] = $GLOBALS['LANG']->getLLL(
-						$llfile[2], $localLang
-					) . ' (' . $itemValue['list_type'] . ')';
+				$itemTemp['content'] = $GLOBALS['LANG']->getLLL($llfile[2], $localLang) . ' (' . $itemValue['list_type'] . ')';
 			} else {
 				preg_match('/^LLL:(EXT:.*?):(.*)/', $ctypes[$itemValue['CType']][0], $llfile);
 				$localLang = t3lib_div::readLLfile($llfile[1], $GLOBALS['LANG']->lang);
 				if (is_file(PATH_site . '/typo3/sysext/t3skin/icons/gfx/' . $ctypes[$itemValue['CType']][2])) {
-					$markersTemp['###ICONEXT###'] = t3lib_div::getIndpEnv(
-							'TYPO3_REQUEST_DIR'
-						) . 'sysext/t3skin/icons/gfx/' . $ctypes[$itemValue['CType']][2];
+					$itemTemp['iconext'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . 'sysext/t3skin/icons/gfx/' . $ctypes[$itemValue['CType']][2];
 				} elseif (preg_match('/^\.\./', $ctypes[$itemValue['CType']][2], $temp)) {
-					$markersTemp['###ICONEXT###'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . $ctypes[$itemValue['CType']][2];
+					$itemTemp['iconext'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . $ctypes[$itemValue['CType']][2];
 				} elseif (preg_match('/^EXT:(.*)$/', $ctypes[$itemValue['CType']][2], $temp)) {
-					$markersTemp['###ICONEXT###'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . '../typo3conf/ext/' . $temp[1];
+					$itemTemp['iconext'] = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . '../typo3conf/ext/' . $temp[1];
 				} else {
-					$markersTemp['###ICONEXT###'] = '';
+					$itemTemp['iconext'] = '';
 				}
-				$markersTemp['###CONTENT###'] = $GLOBALS['LANG']->getLLL(
-						$llfile[2], $localLang
-					) . ' (' . $itemValue['CType'] . ')';
+				$itemTemp['content'] = $GLOBALS['LANG']->getLLL($llfile[2], $localLang) . ' (' . $itemValue['CType'] . ')';
 			}
-
-			$markersTemp['###REFERENCES###'] = $itemValue['nb'];
-			$markersTemp['###POURC###'] = round((($itemValue['nb'] * 100) / $itemsCount[0]['nb']), 2);
-
-			$markersArrayTemp[] = $markersTemp;
+			$itemTemp['references'] = $itemValue['nb'];
+			$itemTemp['pourc'] = round((($itemValue['nb'] * 100) / $itemsCount[0]['nb']), 2);
+			$allItems[] = $itemTemp;
 		}
 
-		$markersArray['###REPORTS_PLUGINS_SUMMARY_OBJECT###'] = $template->renderAllTemplate(
-			$markersArrayTemp, '###REPORTS_PLUGINS_SUMMARY_OBJECT###'
-		);
-
-		$content = $template->renderAllTemplate($markersArray, '###REPORTS_PLUGINS_SUMMARY###');
-
-		return $content;
-	}
-
-	/**
-	 * Creates a page browser for tables with many records
-	 *
-	 * @param int $totalItems
-	 * @param int $iLimit
-	 * @param int $firstElementNumber
-	 * @return string
-	 */
-	public function pluginsRenderListNavigation($totalItems, $iLimit, $firstElementNumber) {
-		$totalPages = ceil($totalItems / $iLimit);
-		$currentPage = floor(($firstElementNumber + 1) / $iLimit) + 1;
-		$content = '';
-		$returnContent = '';
-
-		if ($totalPages >= 0) {
-			$first = $previous = $next = $last = $reload = '';
-			$listUrlOrig = $this->baseURL . '&display=' . $this->display;
-			$listUrl = $this->baseURL . '&display=' . $this->display . '&nbPerPage=' . $this->nbElementsPerPage;
-
-			if (($getFiltersCat = t3lib_div::_GP('filtersCat')) !== NULL) {
-				$listUrl .= '&filtersCat=' . $getFiltersCat;
-			}
-
-			if (($orderby = t3lib_div::_GP('orderby')) !== NULL) {
-				$listUrl .= '&orderby=' . $orderby;
-			}
-
-			// First
-			if ($currentPage > 1) {
-				$labelFirst = $GLOBALS['LANG']->getLL('first');
-				$first = '<a href="' . $listUrl . '&pointer=0">';
-				$first .= '<img width="16" height="16" title="' . $labelFirst . '" alt="' . $labelFirst . '" ';
-				$first .= 'src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-				$first .= '../typo3conf/ext/additional_reports/res/images/control_first.gif"></a>';
-			} else {
-				$first = '<img width="16" height="16" title="" alt="" ';
-				$first .= 'src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-				$first .= '../typo3conf/ext/additional_reports/res/images/control_first_disabled.gif">';
-			}
-
-			// Previous
-			if (($currentPage - 1) > 0) {
-				$labelPrevious = $GLOBALS['LANG']->getLL('previous');
-				$previous = '<a href="' . $listUrl . '&pointer=' . (($currentPage - 2) * $iLimit) . '">';
-				$previous .= '<img width="16" height="16" title="' . $labelPrevious . '" alt="' . $labelPrevious . '" ';
-				$previous .= 'src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-				$previous .= '../typo3conf/ext/additional_reports/res/images/control_previous.gif"></a>';
-			} else {
-				$previous = '<img width="16" height="16" title="" alt="" ';
-				$previous .= 'src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-				$previous .= '../typo3conf/ext/additional_reports/res/images/control_previous_disabled.gif">';
-			}
-
-			// Next
-			if (($currentPage + 1) <= $totalPages) {
-				$labelNext = $GLOBALS['LANG']->getLL('next');
-				$next = '<a href="' . $listUrl . '&pointer=' . (($currentPage) * $iLimit) . '">';
-				$next .= '<img width="16" height="16" title="' . $labelNext . '" alt="' . $labelNext . '" ';
-				$next .= 'src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-				$next .= '../typo3conf/ext/additional_reports/res/images/control_next.gif"></a>';
-			} else {
-				$next = '<img width="16" height="16" title="" alt="" ';
-				$next .= 'src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-				$next .= '../typo3conf/ext/additional_reports/res/images/control_next_disabled.gif">';
-			}
-
-			// Last
-			if ($currentPage != $totalPages) {
-				$labelLast = $GLOBALS['LANG']->getLL('last');
-				$last = '<a href="' . $listUrl . '&pointer=' . (($totalPages - 1) * $iLimit) . '">';
-				$last .= '<img width="16" height="16" title="' . $labelLast . '" alt="' . $labelLast . '" ';
-				$last .= 'src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-				$last .= '../typo3conf/ext/additional_reports/res/images/control_last.gif"></a>';
-			} else {
-				$last = '<img width="16" height="16" title="" alt="" ';
-				$last .= 'src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-				$last .= '../typo3conf/ext/additional_reports/res/images/control_last_disabled.gif">';
-			}
-
-			$pageNumberInput = '<span>' . $currentPage . '</span>';
-			$pageIndicator = '<span class="pageIndicator">';
-			$pageIndicator .= sprintf($GLOBALS['LANG']->getLL('pageIndicator'), $pageNumberInput, $totalPages) . '</span>';
-
-			if ($totalItems > ($firstElementNumber + $iLimit)) {
-				$lastElementNumber = $firstElementNumber + $iLimit;
-			} else {
-				$lastElementNumber = $totalItems;
-			}
-
-			$rangeIndicator = '<span class="pageIndicator">';
-			$rangeIndicator .= sprintf($GLOBALS['LANG']->getLL('rangeIndicator'), $firstElementNumber + 1, $lastElementNumber);
-			$rangeIndicator .= ' / ' . $totalItems . '</span>';
-
-			// nb per page, filter and reload
-			$reload = '<input type="text" name="nbPerPage" id="nbPerPage" size="5" value="' . $this->nbElementsPerPage . '"/> / page ';
-
-			if ($getFiltersCat !== NULL) {
-				$reload .= '<a href="#"  onClick="jumpToUrl(\'' . $listUrlOrig;
-				$reload .= '&nbPerPage=\'+document.getElementById(\'nbPerPage\').value+\'&filtersCat=' . $getFiltersCat . '\');">';
-			} else {
-				$reload .= '<a href="#"  onClick="jumpToUrl(\'' . $listUrlOrig;
-				$reload .= '&nbPerPage=\'+document.getElementById(\'nbPerPage\').value);">';
-			}
-
-			$reload .= '<img width="16" height="16" title="" alt="" src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-			$reload .= '../typo3conf/ext/additional_reports/res/images/refresh_n.gif"></a>';
-
-			if ($this->filtersCat != '') {
-				$reload .= '<span class="bar">&nbsp;</span>';
-				$reload .= $GLOBALS['LANG']->getLL('filterByCat');
-				$reload .= '&nbsp' . $this->filtersCat;
-				$reload .= '<a href="#"  onClick="jumpToUrl(\'' . $listUrlOrig;
-				$reload .= '&nbPerPage=\'+document.getElementById(\'nbPerPage\').value+\'';
-				$reload .= '&filtersCat=\'+document.getElementById(\'filtersCat\').value);">';
-				$reload .= '&nbsp;<img width="16" height="16" title="" alt="" src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-				$reload .= '../typo3conf/ext/additional_reports/res/images/refresh_n.gif"></a>';
-			}
-
-			$content .= '<div id="typo3-dblist-pagination">' . $first . $previous . '<span class="bar">&nbsp;</span>';
-			$content .= $rangeIndicator . '<span class="bar">&nbsp;</span>' . $pageIndicator . '<span class="bar">&nbsp;</span>';
-			$content .= $next . $last . '<span class="bar">&nbsp;</span>' . $reload . '</div>';
-
-			$returnContent = $content;
-		}
-		return $returnContent;
+		return $allItems;
 	}
 
 	/**
@@ -1484,12 +910,14 @@ class tx_additionalreports_main {
 	 */
 	public function displayRealUrlErrors() {
 		$cmd = t3lib_div::_GP('cmd');
+
 		if ($cmd === 'deleteAll') {
 			$GLOBALS['TYPO3_DB']->exec_DELETEquery(
 				'tx_realurl_errorlog',
 				''
 			);
 		}
+
 		if ($cmd === 'delete') {
 			$delete = t3lib_div::_GP('delete');
 			$GLOBALS['TYPO3_DB']->exec_DELETEquery(
@@ -1498,83 +926,40 @@ class tx_additionalreports_main {
 			);
 		}
 
-		// query
-		$query = array();
-		$query['SELECT'] = 'url_hash,url,error,last_referer,counter,cr_date,tstamp';
-		$query['FROM'] = 'tx_realurl_errorlog';
-		$query['WHERE'] = '';
-		$query['GROUPBY'] = '';
-		$query['ORDERBY'] = 'counter DESC';
-		$query['LIMIT'] = '';
-
 		// items
 		$items = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
-			$query['SELECT'],
-			$query['FROM'],
-			$query['WHERE'],
-			$query['GROUPBY'],
-			$query['ORDERBY'],
-			$query['LIMIT']
+			'url_hash,url,error,last_referer,counter,cr_date,tstamp',
+			'tx_realurl_errorlog',
+			'',
+			'',
+			'counter DESC',
+			''
 		);
 
-		// Page browser
-		$pointer = t3lib_div::_GP('pointer');
-		$limit = ($pointer !== NULL) ? $pointer . ',' . $this->nbElementsPerPage : '0,' . $this->nbElementsPerPage;
-		$current = ($pointer !== NULL) ? intval($pointer) : 0;
-		$pageBrowser = self::pluginsRenderListNavigation(count($items), $this->nbElementsPerPage, $current);
-		$itemsBrowser = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
-			$query['SELECT'],
-			$query['FROM'],
-			$query['WHERE'],
-			$query['GROUPBY'],
-			$query['ORDERBY'],
-			$limit
-		);
+		$realurlErrors = array();
 
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/realurlerrors.html');
-		$markersArray = array();
-
-		$markersArray['###PAGEBROWSER###'] = '';
-		$markersArray['###LLL:TITLE###'] = $GLOBALS['LANG']->getLL('realurlerrors_description');
-		$markersArray['###LLL:ERROR###'] = $GLOBALS['LANG']->getLL('error');
-		$markersArray['###LLL:COUNTER###'] = $GLOBALS['LANG']->getLL('counter');
-		$markersArray['###LLL:CRDATE###'] = $GLOBALS['LANG']->getLL('crdate');
-		$markersArray['###LLL:TSTAMP###'] = $GLOBALS['LANG']->getLL('tstamp');
-		$markersArray['###LLL:LAST_REFERER###'] = $GLOBALS['LANG']->getLL('last_referer');
-
-		if (count($itemsBrowser) > 0) {
-			$markersArray['###PAGEBROWSER###'] = $pageBrowser;
-
-			foreach ($itemsBrowser as $itemKey => $itemValue) {
-				$actionUrl = $this->baseURL . '&cmd=delete&delete=' . $itemValue['url_hash'];
+		if (count($items) > 0) {
+			foreach ($items as $itemKey => $itemValue) {
+				$actionUrl = tx_additionalreports_util::getBaseUrl() . '&cmd=delete&delete=' . $itemValue['url_hash'];
 				$action = '<a href="' . $actionUrl . '">';
 				$action .= '<img src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
 				$action .= 'sysext/t3skin/icons/gfx/garbage.gif"/></a>';
-
-				$markersArrayTemp[] = array(
-					'###FLUSH###'        => $action,
-					'###URL###'          => $itemValue['url'],
-					'###ERROR###'        => $itemValue['error'],
-					'###COUNTER###'      => $itemValue['counter'],
-					'###CRDATE###'       => date('d/m/Y H:i:s', $itemValue['cr_date']),
-					'###TSTAMP###'       => date('d/m/Y H:i:s', $itemValue['tstamp']),
-					'###LAST_REFERER###' => $itemValue['last_referer'],
+				$realurlErrors[] = array(
+					'flush'        => $action,
+					'url'          => $itemValue['url'],
+					'error'        => $itemValue['error'],
+					'counter'      => $itemValue['counter'],
+					'crdate'       => date('d/m/Y H:i:s', $itemValue['cr_date']),
+					'tstamp'       => date('d/m/Y H:i:s', $itemValue['tstamp']),
+					'last_referer' => $itemValue['last_referer'],
 				);
 			}
-
-			$markersArray['###REPORTS_REALURLERRORS_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_REALURLERRORS_OBJECT###'
-			);
-
-		} else {
-			$markersArray['###REPORTS_REALURLERRORS_OBJECT###'] = $template->renderAllTemplate(
-				array('###NORESULTS###' => $GLOBALS['LANG']->getLL('noresults')),
-				'###REPORTS_REALURLERRORS_NORESULTS###'
-			);
 		}
 
-		return $template->renderAllTemplate($markersArray, '###REPORTS_REALURLERRORS###');
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/realurlerrors-fluid.html');
+		$view->assign('items', $realurlErrors);
+		return $view->render();
 	}
 
 	/**
@@ -1608,86 +993,42 @@ class tx_additionalreports_main {
 			$query['LIMIT']
 		);
 
-		// Page browser
-		$pointer = t3lib_div::_GP('pointer');
-		$limit = ($pointer !== NULL) ? $pointer . ',' . $this->nbElementsPerPage : '0,' . $this->nbElementsPerPage;
-		$current = ($pointer !== NULL) ? intval($pointer) : 0;
-		$pageBrowser = self::pluginsRenderListNavigation(count($items), $this->nbElementsPerPage, $current);
-		$itemsBrowser = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
-			$query['SELECT'],
-			$query['FROM'],
-			$query['WHERE'],
-			$query['GROUPBY'],
-			$query['ORDERBY'],
-			$limit
-		);
-
 		$content = tx_additionalreports_util::writeInformation(
-			$GLOBALS['LANG']->getLL('flushalllog'), 'DELETE FROM sys_log WHERE error>0;'
+			self::getLl('flushalllog'), 'DELETE FROM sys_log WHERE error>0;'
 		);
 
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/logerrors.html');
-		$markersArray = array();
+		$logErrors = array();
 
-		$markersArray['###PAGEBROWSER###'] = '';
-		$markersArray['###LLL:TITLE###'] = $GLOBALS['LANG']->getLL('logerrors_description');
-		$markersArray['###LLL:ERROR###'] = $GLOBALS['LANG']->getLL('error');
+		$ordercounter = '&nbsp;&nbsp;<a href="' . tx_additionalreports_util::getBaseUrl() . '&orderby=nb%20DESC,tstamp%20DESC">';
+		$ordercounter .= '<img alt="" src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . 'sysext/t3skin/icons/gfx/reddown.gif"></a>';
+		$ordercounter .= '&nbsp;&nbsp;<a href="' . tx_additionalreports_util::getBaseUrl() . '&orderby=nb%20ASC,tstamp%20DESC">';
+		$ordercounter .= '<img alt="" src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . 'sysext/t3skin/icons/gfx/redup.gif"></a>';
 
-		$markersArray['###LLL:COUNTER###'] = $GLOBALS['LANG']->getLL('counter');
-		$markersArray['###LLL:COUNTER###'] .= '&nbsp;&nbsp;<a href="' . $this->baseURL . '&orderby=nb%20DESC,tstamp%20DESC">';
-		$markersArray['###LLL:COUNTER###'] .= '<img alt="" src="' . t3lib_div::getIndpEnv(
-				'TYPO3_REQUEST_DIR'
-			) . 'sysext/t3skin/icons/gfx/reddown.gif"></a>';
-		$markersArray['###LLL:COUNTER###'] .= '&nbsp;&nbsp;<a href="' . $this->baseURL . '&orderby=nb%20ASC,tstamp%20DESC">';
-		$markersArray['###LLL:COUNTER###'] .= '<img alt="" src="' . t3lib_div::getIndpEnv(
-				'TYPO3_REQUEST_DIR'
-			) . 'sysext/t3skin/icons/gfx/redup.gif"></a>';
+		$ordertstamp = '&nbsp;&nbsp;<a href="' . tx_additionalreports_util::getBaseUrl() . '&orderby=tstamp%20DESC,nb%20DESC">';
+		$ordertstamp .= '<img width="7" height="4" alt="" src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . 'sysext/t3skin/icons/gfx/reddown.gif"></a>';
+		$ordertstamp .= '&nbsp;&nbsp;<a href="' . tx_additionalreports_util::getBaseUrl() . '&orderby=tstamp%20ASC,nb%20DESC">';
+		$ordertstamp .= '<img width="7" height="4" alt="" src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . 'sysext/t3skin/icons/gfx/redup.gif"></a>';
 
-		$markersArray['###LLL:TSTAMP###'] = $GLOBALS['LANG']->getLL('tstamp');
-		$markersArray['###LLL:TSTAMP###'] .= '&nbsp;&nbsp;<a href="' . $this->baseURL . '&orderby=tstamp%20DESC,nb%20DESC">';
-		$markersArray['###LLL:TSTAMP###'] .= '<img width="7" height="4" alt="" src="' . t3lib_div::getIndpEnv(
-				'TYPO3_REQUEST_DIR'
-			) . 'sysext/t3skin/icons/gfx/reddown.gif"></a>';
-		$markersArray['###LLL:TSTAMP###'] .= '&nbsp;&nbsp;<a href="' . $this->baseURL . '&orderby=tstamp%20ASC,nb%20DESC">';
-		$markersArray['###LLL:TSTAMP###'] .= '<img width="7" height="4" alt="" src="' . t3lib_div::getIndpEnv(
-				'TYPO3_REQUEST_DIR'
-			) . 'sysext/t3skin/icons/gfx/redup.gif"></a>';
-
-		if (count($itemsBrowser) > 0) {
-
-			$markersArray['###PAGEBROWSER###'] = $pageBrowser;
-
-			$markersArrayTemp = array();
-
-			foreach ($itemsBrowser as $itemKey => $itemValue) {
-				$deleteStatement = '<br/><img src="' . t3lib_div::getIndpEnv(
-						'TYPO3_REQUEST_DIR'
-					) . 'sysext/t3skin/icons/gfx/garbage.gif"/>  DELETE FROM sys_log WHERE error>0 AND details = "' . htmlentities(
+		if (count($items) > 0) {
+			foreach ($items as $itemKey => $itemValue) {
+				$deleteStatement = '<br/><img src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') .
+					'sysext/t3skin/icons/gfx/garbage.gif"/>  DELETE FROM sys_log WHERE error>0 AND details = "' . htmlentities(
 						$GLOBALS['TYPO3_DB']->fullQuoteStr($itemValue['details'], NULL)
 					) . '";';
-
-				$markersArrayTemp[] = array(
-					'###COUNTER###' => $itemValue['nb'],
-					'###TSTAMP###'  => date('d/m/Y H:i:s', $itemValue['tstamp']),
-					'###ERROR###'   => htmlentities($itemValue['details']) . $deleteStatement
+				$logErrors[] = array(
+					'counter' => $itemValue['nb'],
+					'tstamp'  => date('d/m/Y H:i:s', $itemValue['tstamp']),
+					'error'   => htmlentities($itemValue['details']) . $deleteStatement
 				);
 			}
-
-			$markersArray['###REPORTS_LOGERRORS_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_LOGERRORS_OBJECT###'
-			);
-
-		} else {
-			$markersArray['###REPORTS_LOGERRORS_OBJECT###'] = $template->renderAllTemplate(
-				array('###NORESULTS###' => $GLOBALS['LANG']->getLL('noresults')),
-				'###REPORTS_LOGERRORS_NORESULTS###'
-			);
 		}
 
-		$content .= $template->renderAllTemplate($markersArray, '###REPORTS_LOGERRORS###');
-
-		return $content;
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/logerrors-fluid.html');
+		$view->assign('items', $logErrors);
+		$view->assign('ordercounter', $ordercounter);
+		$view->assign('ordertstamp', $ordertstamp);
+		return $content . $view->render();
 	}
 
 	/**
@@ -1696,10 +1037,6 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function displayWebsitesConf() {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/websiteconf.html');
-		$markersArray = array();
-
 		$items = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
 			'uid, title',
 			'pages',
@@ -1708,15 +1045,11 @@ class tx_additionalreports_main {
 			'uid'
 		);
 
-		$markersArray['###LLL:TITLE###'] = $GLOBALS['LANG']->getLL('websitesconf_description');
-		$markersArray['###LLL:PID###'] = $GLOBALS['LANG']->getLL('pid');
-		$markersArray['###LLL:PAGETITLE###'] = $GLOBALS['LANG']->getLL('pagetitle');
-		$markersArray['###LLL:DOMAINS###'] = $GLOBALS['LANG']->getLL('domains');
+		$websiteconf = array();
 
 		if (!empty($items)) {
-			$markersArrayTemp = array();
 			foreach ($items as $itemKey => $itemValue) {
-				$markersObj = array();
+				$websiteconfItem = array();
 
 				$domainRecords = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
 					'uid, pid, domainName',
@@ -1726,13 +1059,13 @@ class tx_additionalreports_main {
 					'sorting'
 				);
 
-				$markersObj['###PID###'] = $itemValue['uid'];
-				$markersObj['###PAGETITLE###'] = tx_additionalreports_util::getIconPage() . $itemValue['title'];
-				$markersObj['###DOMAINS###'] = '';
-				$markersObj['###TEMPLATE###'] = '';
+				$websiteconfItem['pid'] = $itemValue['uid'];
+				$websiteconfItem['pagetitle'] = tx_additionalreports_util::getIconPage() . $itemValue['title'];
+				$websiteconfItem['domains'] = '';
+				$websiteconfItem['template'] = '';
 
 				foreach ($domainRecords as $domain) {
-					$markersObj['###DOMAINS###'] .= tx_additionalreports_util::getIconDomain() . $domain['domainName'] . '<br/>';
+					$websiteconfItem['domains'] .= tx_additionalreports_util::getIconDomain() . $domain['domainName'] . '<br/>';
 				}
 
 				$templates = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
@@ -1745,9 +1078,9 @@ class tx_additionalreports_main {
 
 
 				foreach ($templates as $templateObj) {
-					$markersObj['###TEMPLATE###'] .= '<img src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-					$markersObj['###TEMPLATE###'] .= 'sysext/t3skin/icons/gfx/i/template.gif"/> ' . $templateObj['title'] . ' ';
-					$markersObj['###TEMPLATE###'] .= '[uid=' . $templateObj['uid'] . ',root=' . $templateObj['root'] . ']<br/>';
+					$websiteconfItem['template'] .= '<img src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
+					$websiteconfItem['template'] .= 'sysext/t3skin/icons/gfx/i/template.gif"/> ' . $templateObj['title'] . ' ';
+					$websiteconfItem['template'] .= '[uid=' . $templateObj['uid'] . ',root=' . $templateObj['root'] . ']<br/>';
 				}
 
 				// baseurl
@@ -1756,29 +1089,23 @@ class tx_additionalreports_main {
 				$tmpl->init();
 				$tmpl->runThroughTemplates(tx_additionalreports_util::getRootLine($itemValue['uid']), 0);
 				$tmpl->generateConfig();
-				$markersObj['###BASEURL###'] = $tmpl->setup['config.']['baseURL'];
+				$websiteconfItem['baseurl'] = $tmpl->setup['config.']['baseURL'];
 
 				// count pages
 				$list = tx_additionalreports_util::getTreeList($itemValue['uid'], 99, 0, '1=1');
 				$listArray = explode(',', $list);
-				$markersObj['###PAGES###'] = (count($listArray) - 1);
-				$markersObj['###PAGESHIDDEN###'] = (tx_additionalreports_util::getCountPagesUids($list, 'hidden=1'));
-				$markersObj['###PAGESNOSEARCH###'] = (tx_additionalreports_util::getCountPagesUids($list, 'no_search=1'));
+				$websiteconfItem['pages'] = (count($listArray) - 1);
+				$websiteconfItem['pageshidden'] = (tx_additionalreports_util::getCountPagesUids($list, 'hidden=1'));
+				$websiteconfItem['pagesnosearch'] = (tx_additionalreports_util::getCountPagesUids($list, 'no_search=1'));
 
-				$markersArrayTemp[] = $markersObj;
+				$websiteconf[] = $websiteconfItem;
 			}
-
-			$markersArray['###REPORTS_WEBSITE_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_WEBSITE_OBJECT###'
-			);
-		} else {
-			$markersArray['###REPORTS_WEBSITE_OBJECT###'] = $template->renderAllTemplate(
-				array('###NORESULTS###' => $GLOBALS['LANG']->getLL('noresults')),
-				'###REPORTS_WEBSITE_NORESULTS###'
-			);
 		}
 
-		return $template->renderAllTemplate($markersArray, '###REPORTS_WEBSITE###');
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/websiteconf-fluid.html');
+		$view->assign('items', $websiteconf);
+		return $view->render();
 	}
 
 	/**
@@ -1787,119 +1114,60 @@ class tx_additionalreports_main {
 	 * @return string HTML code
 	 */
 	public function displayDbCheck() {
-		$template = new tx_additionalreports_templating();
-		$template->initTemplate(t3lib_extMgm::extPath('additional_reports') . 'res/templates/dbcheck.html');
-
 		$sqlStatements = tx_additionalreports_util::getSqlUpdateStatements();
-		$content = '';
+		$dbchecks = array();
 
 		if (!empty($sqlStatements['update']['add'])) {
-			$markersArray = array();
-			$markersArray['###LLL:TITLE###'] = 'Add fields';
-			$markersArrayTemp = array();
-			foreach ($sqlStatements['update']['add'] as $itemKey => $itemValue) {
-				$markersArrayTemp[] = array('###VALUE###' => $itemValue);
-			}
-			$markersArray['###REPORTS_DBCHECK_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_DBCHECK_OBJECT###'
-			);
-			$content .= $template->renderAllTemplate($markersArray, '###REPORTS_DBCHECK###');
+			$dbchecks[1]['title'] = 'Add fields';
+			$dbchecks[1]['items'] = $sqlStatements['update']['add'];
 		}
 
 		if (!empty($sqlStatements['update']['change'])) {
-			$markersArray = array();
-			$markersArray['###LLL:TITLE###'] = 'Changing fields';
-			$markersArrayTemp = array();
+			$dbchecks[2]['title'] = 'Changing fields';
 			foreach ($sqlStatements['update']['change'] as $itemKey => $itemValue) {
 				if (isset($sqlStatements['update']['change_currentValue'][$itemKey])) {
-					$markersArrayTemp[] = array(
-						'###VALUE###' => $itemValue . ' -- [current: ' . $sqlStatements['update']['change_currentValue'][$itemKey] . ']'
-					);
+					$dbchecks[2]['items'][] = $itemValue . ' -- [current: ' . $sqlStatements['update']['change_currentValue'][$itemKey] . ']';
 				} else {
-					$markersArrayTemp[] = array('###VALUE###' => $itemValue);
+					$dbchecks[2]['items'][] = $itemValue;
 				}
 			}
-			$markersArray['###REPORTS_DBCHECK_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_DBCHECK_OBJECT###'
-			);
-			$content .= $template->renderAllTemplate($markersArray, '###REPORTS_DBCHECK###');
 		}
 
 		if (!empty($sqlStatements['remove']['change'])) {
-			$markersArray = array();
-			$markersArray['###LLL:TITLE###'] = 'Remove unused fields (rename with prefix)';
-			$markersArrayTemp = array();
-			foreach ($sqlStatements['remove']['change'] as $itemKey => $itemValue) {
-				$markersArrayTemp[] = array('###VALUE###' => $itemValue);
-			}
-			$markersArray['###REPORTS_DBCHECK_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_DBCHECK_OBJECT###'
-			);
-			$content .= $template->renderAllTemplate($markersArray, '###REPORTS_DBCHECK###');
+			$dbchecks[3]['title'] = 'Remove unused fields (rename with prefix)';
+			$dbchecks[3]['items'] = $sqlStatements['remove']['change'];
 		}
 
 		if (!empty($sqlStatements['remove']['drop'])) {
-			$markersArray = array();
-			$markersArray['###LLL:TITLE###'] = 'Drop fields (really!)';
-			$markersArrayTemp = array();
-			foreach ($sqlStatements['remove']['drop'] as $itemKey => $itemValue) {
-				$markersArrayTemp[] = array('###VALUE###' => $itemValue);
-			}
-			$markersArray['###REPORTS_DBCHECK_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_DBCHECK_OBJECT###'
-			);
-			$content .= $template->renderAllTemplate($markersArray, '###REPORTS_DBCHECK###');
+			$dbchecks[4]['title'] = 'Drop fields (really!)';
+			$dbchecks[4]['items'] = $sqlStatements['remove']['drop'];
 		}
 
 		if (!empty($sqlStatements['update']['create_table'])) {
-			$markersArray = array();
-			$markersArray['###LLL:TITLE###'] = 'Add tables';
-			$markersArrayTemp = array();
-			foreach ($sqlStatements['update']['create_table'] as $itemKey => $itemValue) {
-				$markersArrayTemp[] = array('###VALUE###' => $itemValue);
-			}
-			$markersArray['###REPORTS_DBCHECK_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_DBCHECK_OBJECT###'
-			);
-			$content .= $template->renderAllTemplate($markersArray, '###REPORTS_DBCHECK###');
+			$dbchecks[5]['title'] = 'Add tables';
+			$dbchecks[5]['items'] = $sqlStatements['update']['create_table'];
 		}
 
 		if (!empty($sqlStatements['remove']['change_table'])) {
-			$markersArray = array();
-			$markersArray['###LLL:TITLE###'] = 'Removing tables (rename with prefix)';
-			$markersArrayTemp = array();
+			$dbchecks[6]['title'] = 'Removing tables (rename with prefix)';
 			foreach ($sqlStatements['remove']['change_table'] as $itemKey => $itemValue) {
 				if (!empty($sqlStatements['remove']['tables_count'][$itemKey])) {
-					$markersArrayTemp[] = array(
-						'###VALUE###' => $itemValue . ' -- [' . $sqlStatements['remove']['tables_count'][$itemKey] . ']'
-					);
+					$dbchecks[6]['items'][] = $itemValue . ' -- [' . $sqlStatements['remove']['tables_count'][$itemKey] . ']';
 				} else {
-					$markersArrayTemp[] = array('###VALUE###' => $itemValue . ' -- [empty]');
+					$dbchecks[6]['items'][] = $itemValue . ' -- [empty]';
 				}
 			}
-			$markersArray['###REPORTS_DBCHECK_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_DBCHECK_OBJECT###'
-			);
-			$content .= $template->renderAllTemplate($markersArray, '###REPORTS_DBCHECK###');
 		}
 
 		if (!empty($sqlStatements['remove']['drop_table'])) {
-			$markersArray = array();
-			$markersArray['###LLL:TITLE###'] = 'Drop tables (really!)';
-			$markersArrayTemp = array();
+			$dbchecks[7]['title'] = 'Drop tables (really!)';
 			foreach ($sqlStatements['remove']['drop_table'] as $itemKey => $itemValue) {
 				if (!empty($sqlStatements['remove']['tables_count'][$itemKey])) {
-					$markersArrayTemp[] = array(
-						'###VALUE###' => $itemValue . ' -- [' . $sqlStatements['remove']['tables_count'][$itemKey] . ']'
-					);
+					$dbchecks[7]['items'][] = $itemValue . ' -- [' . $sqlStatements['remove']['tables_count'][$itemKey] . ']';
 				} else {
-					$markersArrayTemp[] = array('###VALUE###' => $itemValue . ' -- [empty]');
+					$dbchecks[7]['items'][] = $itemValue . ' -- [empty]';
 				}
 			}
-			$markersArray['###REPORTS_DBCHECK_OBJECT###'] = $template->renderAllTemplate(
-				$markersArrayTemp, '###REPORTS_DBCHECK_OBJECT###'
-			);
-			$content .= $template->renderAllTemplate($markersArray, '###REPORTS_DBCHECK###');
 		}
 
 		// dump sql structure
@@ -1918,10 +1186,13 @@ class tx_additionalreports_main {
 			$GLOBALS['TYPO3_DB']->sql_free_result($resSqlDump);
 		}
 
-		$content .= '<h3 class="uppercase">Dump SQL Structure (md5:' . md5($sqlStructure) . ')</h3>';
+		$content = '<h3 class="uppercase">Dump SQL Structure (md5:' . md5($sqlStructure) . ')</h3>';
 		$content .= '<textarea style="width:100%;height:200px;">' . $sqlStructure . '</textarea>';
 
-		return $content;
+		$view = t3lib_div::makeInstance('Tx_Fluid_View_StandaloneView');
+		$view->setTemplatePathAndFilename(t3lib_extMgm::extPath('additional_reports') . 'res/templates/dbcheck-fluid.html');
+		$view->assign('dbchecks', $dbchecks);
+		return $view->render() . $content;
 	}
 
 }
