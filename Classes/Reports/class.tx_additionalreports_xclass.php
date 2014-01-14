@@ -29,17 +29,7 @@
  * @author         CERDAN Yohann <cerdanyohann@yahoo.fr>
  * @package        TYPO3
  */
-
-class tx_additionalreports_realurlerrors extends tx_additionalreports_report implements tx_reports_Report {
-
-	/**
-	 * Constructor for class tx_additionalreports_xclass
-	 *
-	 * @param    object    Back-reference to the calling reports module
-	 */
-	public function __construct($reportObject) {
-		parent::__construct($reportObject);
-	}
+class tx_additionalreports_xclass extends tx_additionalreports_report implements tx_reports_Report {
 
 	/**
 	 * This method renders the report
@@ -47,17 +37,15 @@ class tx_additionalreports_realurlerrors extends tx_additionalreports_report imp
 	 * @return    string    The status report as HTML
 	 */
 	public function getReport() {
-		$actionURL = tx_additionalreports_util::getBaseUrl() . '&cmd=deleteAll';
-		$content = '<a href="' . $actionURL . '"><img src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . 'sysext/t3skin/icons/gfx/garbage.gif"/> ' . $GLOBALS['LANG']->getLL('flushalllog') . '</a>';
-		$content .= tx_additionalreports_main::displayRealUrlErrors();
+		$content = '<p class="help">' . $GLOBALS['LANG']->getLL('xclass_description') . '</p>';
+		$content .= tx_additionalreports_main::displayXclass();
 		return $content;
 	}
 
 }
 
-
-if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/reports/reports_xclass/class.tx_additionalreports_xclass.php']) {
-	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/reports/reports_xclass/class.tx_additionalreports_xclass.php']);
+if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_xclass.php']) {
+	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_xclass.php']);
 }
 
 ?>

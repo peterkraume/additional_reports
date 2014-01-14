@@ -28,8 +28,7 @@
  * @author         CERDAN Yohann <cerdanyohann@yahoo.fr>
  * @package        TYPO3
  */
-
-class tx_additionalreports_dbcheck extends tx_additionalreports_report implements tx_reports_Report {
+class tx_additionalreports_eid extends tx_additionalreports_report implements tx_reports_Report {
 
 	/**
 	 * This method renders the report
@@ -37,16 +36,15 @@ class tx_additionalreports_dbcheck extends tx_additionalreports_report implement
 	 * @return    string    The status report as HTML
 	 */
 	public function getReport() {
-		$content = '<p class="help">' . $GLOBALS['LANG']->getLL('dbcheck_description') . '</p>';
-		$content .= tx_additionalreports_main::displayDbCheck();
+		$content = tx_additionalreports_main::displayEid();
 		return $content;
 	}
 
 }
 
 
-if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/reports/reports_dbcheck/class.tx_additionalreports_dbcheck.php']) {
-	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/reports/reports_dbcheck/class.tx_additionalreports_dbcheck.php']);
+if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_eid.php']) {
+	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_eid.php']);
 }
 
 ?>

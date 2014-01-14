@@ -24,29 +24,38 @@
 
 /**
  * This class provides a report displaying a list of informations
- * Code inspired by EXT:dam/lib/class.tx_dam_svlist.php by Rene Fritz
  *
  * @author         CERDAN Yohann <cerdanyohann@yahoo.fr>
  * @package        TYPO3
  */
+class tx_additionalreports_logerrors extends tx_additionalreports_report implements tx_reports_Report {
 
-class tx_additionalreports_websitesconf extends tx_additionalreports_report implements tx_reports_Report {
+	/**
+	 * Constructor for class tx_additionalreports_xclass
+	 *
+	 * @param    object    Back-reference to the calling reports module
+	 */
+	public function __construct($reportObject) {
+		parent::__construct($reportObject);
+	}
 
 	/**
 	 * This method renders the report
 	 *
 	 * @return    string    The status report as HTML
 	 */
+
 	public function getReport() {
-		$content = '';
-		$content .= tx_additionalreports_main::displayWebsitesConf();
+		//$actionURL = $this->baseURL . '&cmd=deleteAll';
+		//$content = '<a href="' . $actionURL . '"><img src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR') . 'sysext/t3skin/icons/gfx/garbage.gif"/> ' . $GLOBALS['LANG']->getLL('flushalllog') . '</a>';
+		$content = tx_additionalreports_main::displayLogErrors();
 		return $content;
 	}
 
 }
 
-if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['websitesconf']['ext/additional_reports/reports/reports_websitesconf/class.tx_additionalreports_websitesconf.php']) {
-	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['websitesconf']['ext/additional_reports/reports/reports_websitesconf/class.tx_additionalreports_websitesconf.php']);
+if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_logerrors.php']) {
+	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_logerrors.php']);
 }
 
 ?>

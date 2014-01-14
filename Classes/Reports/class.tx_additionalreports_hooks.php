@@ -24,12 +24,12 @@
 
 /**
  * This class provides a report displaying a list of informations
+ * Code inspired by EXT:dam/lib/class.tx_dam_svlist.php by Rene Fritz
  *
  * @author         CERDAN Yohann <cerdanyohann@yahoo.fr>
  * @package        TYPO3
  */
-
-class tx_additionalreports_ajax extends tx_additionalreports_report implements tx_reports_Report {
+class tx_additionalreports_hooks extends tx_additionalreports_report implements tx_reports_Report {
 
 	/**
 	 * This method renders the report
@@ -37,15 +37,16 @@ class tx_additionalreports_ajax extends tx_additionalreports_report implements t
 	 * @return    string    The status report as HTML
 	 */
 	public function getReport() {
-		$content = tx_additionalreports_main::displayAjax();
+		$content = '<p class="help">' . $GLOBALS['LANG']->getLL('hooks_description') . '</p>';
+		$content .= tx_additionalreports_main::displayHooks();
 		return $content;
 	}
 
 }
 
 
-if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/reports/reports_ajax/class.tx_additionalreports_ajax.php']) {
-	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/reports/reports_ajax/class.tx_additionalreports_ajax.php']);
+if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_hooks.php']) {
+	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_hooks.php']);
 }
 
 ?>

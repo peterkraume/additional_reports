@@ -24,30 +24,35 @@
 
 /**
  * This class provides a report displaying a list of informations
- * Code inspired by EXT:dam/lib/class.tx_dam_svlist.php by Rene Fritz
  *
- * @author         CERDAN Yohann <cerdanyohann@yahoo.fr>
- * @package        TYPO3
+ * @author  CERDAN Yohann <cerdanyohann@yahoo.fr>
+ * @package TYPO3
  */
+class tx_additionalreports_plugins extends tx_additionalreports_report implements tx_reports_Report {
 
-class tx_additionalreports_hooks extends tx_additionalreports_report implements tx_reports_Report {
+	/**
+	 * Constructor for class tx_additionalreports_plugins
+	 *
+	 * @param object $reportObject Back-reference to the calling reports module
+	 */
+	public function __construct($reportObject) {
+		parent::__construct($reportObject);
+	}
 
 	/**
 	 * This method renders the report
 	 *
-	 * @return    string    The status report as HTML
+	 * @return string The status report as HTML
 	 */
 	public function getReport() {
-		$content = '<p class="help">' . $GLOBALS['LANG']->getLL('hooks_description') . '</p>';
-		$content .= tx_additionalreports_main::displayHooks();
+		$content = tx_additionalreports_main::displayPlugins();
 		return $content;
 	}
 
 }
 
-
-if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/reports/reports_hooks/class.tx_additionalreports_hooks.php']) {
-	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/reports/reports_hooks/class.tx_additionalreports_hooks.php']);
+if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_plugins.php']) {
+	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_plugins.php']);
 }
 
 ?>

@@ -25,35 +25,25 @@
 /**
  * This class provides a report displaying a list of informations
  *
- * @author  CERDAN Yohann <cerdanyohann@yahoo.fr>
- * @package TYPO3
+ * @author         CERDAN Yohann <cerdanyohann@yahoo.fr>
+ * @package        TYPO3
  */
-
-class tx_additionalreports_plugins extends tx_additionalreports_report implements tx_reports_Report {
-
-	/**
-	 * Constructor for class tx_additionalreports_plugins
-	 *
-	 * @param object $reportObject Back-reference to the calling reports module
-	 */
-	public function __construct($reportObject) {
-		parent::__construct($reportObject);
-	}
+class tx_additionalreports_extdirect extends tx_additionalreports_report implements tx_reports_Report {
 
 	/**
 	 * This method renders the report
 	 *
-	 * @return string The status report as HTML
+	 * @return    string    The status report as HTML
 	 */
 	public function getReport() {
-		$content = tx_additionalreports_main::displayPlugins();
+		$content = tx_additionalreports_main::displayExtDirect();
 		return $content;
 	}
 
 }
 
-if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/reports/reports_plugins/class.tx_additionalreports_plugins.php']) {
-	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/reports/reports_plugins/class.tx_additionalreports_plugins.php']);
+if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_extdirect.php']) {
+	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/additional_reports/Classes/Reports/class.tx_additionalreports_extdirect.php']);
 }
 
 ?>

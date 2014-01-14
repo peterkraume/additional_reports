@@ -971,7 +971,7 @@ class tx_additionalreports_util {
 		$content .= '<a href="#"  onClick="jumpToUrl(\'' . $listUrlOrig;
 		$content .= '&filtersCat=\'+document.getElementById(\'filtersCat\').value);">';
 		$content .= '&nbsp;<img width="16" height="16" title="" alt="" src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-		$content .= '../typo3conf/ext/additional_reports/res/images/refresh_n.gif"></a>';
+		$content .= '../typo3/sysext/t3skin/icons/gfx/refresh_n.gif"></a>';
 
 		return $content;
 	}
@@ -1025,7 +1025,7 @@ class tx_additionalreports_util {
 		$content .= '<a href="#"  onClick="jumpToUrl(\'' . $listUrlOrig;
 		$content .= '&filtersCat=\'+document.getElementById(\'filtersCat\').value);">';
 		$content .= '&nbsp;<img width="16" height="16" title="" alt="" src="' . t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-		$content .= '../typo3conf/ext/additional_reports/res/images/refresh_n.gif"></a>';
+		$content .= '../typo3/sysext/t3skin/icons/gfx/refresh_n.gif"></a>';
 
 		return $content;
 	}
