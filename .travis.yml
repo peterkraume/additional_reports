@@ -34,8 +34,8 @@ before_script:
   - if [[ -d core/t3lib ]]; then mv core/t3lib . ; fi
   - mv build-environment/typo3conf .
   - git clone --single-branch --branch master --depth 1 git://git.typo3.org/TYPO3v4/Extensions/phpunit.git typo3conf/ext/phpunit/
-  - git clone --depth 1 git://github.com/Apen/additional_reports.git typo3conf/ext/additional_reports
-  #- mv news ./typo3conf/ext
+  # - git clone --depth 1 git://github.com/Apen/additional_reports.git typo3conf/ext/additional_reports
+  - mv additional_reports ./typo3conf/ext
   - mkdir fileadmin
   - mkdir uploads
   - if [[ "$DB" == "mysql" ]]; then mysql -e "DROP DATABASE IF EXISTS typo3_test;" -uroot; fi
