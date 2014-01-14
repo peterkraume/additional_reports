@@ -16,7 +16,6 @@ matrix:
     - php: 5.5
       env: DB=mysql TYPO3=master INTEGRATION=master
 
-
 before_script:
   - sudo apt-get update && sudo apt-get install git
 # Install build dependencies
