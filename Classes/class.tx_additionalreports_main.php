@@ -37,7 +37,7 @@ class tx_additionalreports_main {
 	 */
 	public static function getCss() {
 		return t3lib_extMgm::extRelPath('additional_reports') . 'res/css/tx_additionalreports.css';
-	}
+	} 
 
 	public function getLl($key) {
 		return $GLOBALS['LANG']->getLL($key);
