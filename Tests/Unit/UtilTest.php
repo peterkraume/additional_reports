@@ -472,6 +472,7 @@ class UtilTest extends Tx_Phpunit_TestCase {
 		$testExplode = explode(':', $content, 3);
 		$this->assertTrue(preg_match('/^[a-f0-9]{32}$/', $testExplode[0]) > 0);
 		$this->assertTrue($testExplode[1] === 'gzcompress');
+		$this->assertTrue(strlen($testExplode[2]) === 474613);
 		$files = tx_additionalreports_util::extractExtensionDataFromT3x($content);
 		$this->testArray($files);
 	}
