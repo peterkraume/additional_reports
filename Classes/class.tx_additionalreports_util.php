@@ -489,8 +489,11 @@ class tx_additionalreports_util {
 	 */
 	public static function getDomain($pageUid) {
 		$domain = t3lib_BEfunc::firstDomainRecord(self::getRootLine($pageUid));
-		if ($domain === NULL) {
+		if (empty($domain)) {
 			$domain = t3lib_div::getIndpEnv('TYPO3_HOST_ONLY');
+		}
+		if (empty($domain)) {
+			$domain = 'localhost';
 		}
 		return $domain;
 	}
@@ -796,9 +799,6 @@ class tx_additionalreports_util {
 		$EM_CONF = array();
 		if (!is_string($key) || empty($key)) {
 			throw new InvalidArgumentException('Extension key must be a non-empty string.');
-		}
-		if (!t3lib_extMgm::isLoaded($key)) {
-			return '';
 		}
 
 		// need for the next include
