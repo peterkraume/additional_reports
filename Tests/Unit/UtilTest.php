@@ -493,7 +493,7 @@ class UtilTest extends Tx_Phpunit_TestCase {
 	 * @test
 	 */
 	public function initTSFE() {
-		tx_additionalreports_util::initTSFE(0);
+		tx_additionalreports_util::initTSFE(1);
 		$this->assertTrue(!empty($GLOBALS['TSFE']));
 	}
 
