@@ -800,6 +800,9 @@ class tx_additionalreports_util {
 		if (!is_string($key) || empty($key)) {
 			throw new InvalidArgumentException('Extension key must be a non-empty string.');
 		}
+		if (!t3lib_extMgm::isLoaded($key)) {
+			return NULL;
+		}
 
 		// need for the next include
 		$_EXTKEY = $key;
