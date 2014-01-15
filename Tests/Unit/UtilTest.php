@@ -466,14 +466,14 @@ class UtilTest extends Tx_Phpunit_TestCase {
 		$this->assertTrue($testExplode[1] === 'gzcompress');
 		$this->assertTrue(strlen($testExplode[2]) === 474613);
 		$files = tx_additionalreports_util::extractExtensionDataFromT3x($content);
-		$this->testArray($files);
+		$this->testArray($files['FILES']);
 	}
 
 	/**
 	 * @test
 	 */
 	public function downloadT3x() {
-		$content = tx_additionalreports_util::downloadT3x('additional_reports', tx_additionalreports_util::getExtensionVersion('additional_reports'), 'ext_tables.php');
+		$content = tx_additionalreports_util::downloadT3x('additional_reports', '2.6.4', 'ext_tables.php');
 		$this->assertTrue(!empty($content));
 	}
 
