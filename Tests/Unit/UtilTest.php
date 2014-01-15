@@ -87,8 +87,8 @@ class UtilTest extends Tx_Phpunit_TestCase {
 		$allExtension = tx_additionalreports_util::getInstExtList(PATH_typo3conf . 'ext/', $dbSchema);
 		$this->testArray($allExtension);
 		$this->testArray($allExtension['ter']);
-		$this->testArray($allExtension['dev']);
-		$this->testArray($allExtension['unloaded']);
+		//$this->testArray($allExtension['dev']);
+		//$this->testArray($allExtension['unloaded']);
 		unset($dbSchema);
 		unset($allExtension);
 	}
@@ -421,7 +421,12 @@ class UtilTest extends Tx_Phpunit_TestCase {
 	 * @test
 	 */
 	public function getJsonVersionInfos() {
-		$this->testArray(tx_additionalreports_util::getJsonVersionInfos());
+		$jsonVersions = tx_additionalreports_util::getJsonVersionInfos();
+		$currentVersion = explode('.', TYPO3_version);
+		$this->testArray($jsonVersions);
+		$this->testArray($jsonVersions[$currentVersion[0] . '.' . $currentVersion[1]]);
+		$this->testArray($jsonVersions[$currentVersion[0] . '.' . $currentVersion[1]]['releases']);
+		$this->testArray($jsonVersions[$currentVersion[0] . '.' . $currentVersion[1]]['releases']['4.5.32']);
 	}
 
 	/**
