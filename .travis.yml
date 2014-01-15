@@ -1,7 +1,7 @@
 language: php
 php:
   - 5.3
-  - 5.4
+#  - 5.4
 
 env:
   - DB=mysql TYPO3=master INTEGRATION=master
@@ -11,10 +11,10 @@ env:
   - DB=mysql TYPO3=TYPO3_4-6 INTEGRATION=TYPO3_4-7
   - DB=mysql TYPO3=TYPO3_4-5 INTEGRATION=TYPO3_4-7
 
-matrix:
-  include:
-    - php: 5.5
-      env: DB=mysql TYPO3=master INTEGRATION=master
+#matrix:
+#  include:
+#    - php: 5.5
+#      env: DB=mysql TYPO3=master INTEGRATION=master
 
 before_script:
   - sudo apt-get update && sudo apt-get install git
