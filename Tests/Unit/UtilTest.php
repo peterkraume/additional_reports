@@ -459,14 +459,6 @@ class UtilTest extends Tx_Phpunit_TestCase {
 	/**
 	 * @test
 	 */
-	public function downloadT3x() {
-		$content = tx_additionalreports_util::downloadT3x('additional_reports', tx_additionalreports_util::getExtensionVersion('additional_reports'), 'ext_tables.php');
-		$this->assertTrue(!empty($content));
-	}
-
-	/**
-	 * @test
-	 */
 	public function extractExtensionDataFromT3x() {
 		$content = t3lib_div::getURL('http://typo3.org/fileadmin/ter/a/d/additional_reports_2.6.4.t3x');
 		$testExplode = explode(':', $content, 3);
@@ -475,6 +467,14 @@ class UtilTest extends Tx_Phpunit_TestCase {
 		$this->assertTrue(strlen($testExplode[2]) === 474613);
 		$files = tx_additionalreports_util::extractExtensionDataFromT3x($content);
 		$this->testArray($files);
+	}
+
+	/**
+	 * @test
+	 */
+	public function downloadT3x() {
+		$content = tx_additionalreports_util::downloadT3x('additional_reports', tx_additionalreports_util::getExtensionVersion('additional_reports'), 'ext_tables.php');
+		$this->assertTrue(!empty($content));
 	}
 
 	/**
