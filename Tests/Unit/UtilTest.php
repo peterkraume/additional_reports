@@ -467,6 +467,25 @@ class UtilTest extends Tx_Phpunit_TestCase {
 	/**
 	 * @test
 	 */
+	public function extractExtensionDataFromT3x() {
+		$content = t3lib_div::getURL('http://typo3.org/fileadmin/ter/a/d/additional_reports_2.6.4.t3x');
+		$files = tx_additionalreports_util::extractExtensionDataFromT3x($content);
+		$this->testArray($files);
+		$testExplode = explode(':', $content, 3);
+		$this->assertTrue(preg_match('/^[a-f0-9]{32}$/', $testExplode[0]) > 0);
+		$this->assertTrue($testExplode[1] === 'gzcompress');
+	}
+
+	/**
+	 * @test
+	 */
+	public function isGzuncompress() {
+		$this->assertTrue(function_exists('gzuncompress'));
+	}
+
+	/**
+	 * @test
+	 */
 	public function initTSFE() {
 		tx_additionalreports_util::initTSFE(0);
 		$this->assertTrue(!empty($GLOBALS['TSFE']));

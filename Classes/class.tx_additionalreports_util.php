@@ -1191,8 +1191,7 @@ class tx_additionalreports_util {
 		$firstLetter = strtolower(substr($extension, 0, 1));
 		$secondLetter = strtolower(substr($extension, 1, 1));
 		$from = 'http://typo3.org/fileadmin/ter/' . $firstLetter . '/' . $secondLetter . '/' . $extension . '_' . $version . '.t3x';
-		//$content = t3lib_div::getURL($from);
-		$content = file_get_contents($from);
+		$content = t3lib_div::getURL($from);
 		$t3xfiles = self::extractExtensionDataFromT3x($content);
 		return $t3xfiles['FILES'][$extFile]['content'];
 	}
