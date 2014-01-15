@@ -36,10 +36,12 @@ before_script:
   - git clone --single-branch --branch master --depth 1 git://git.typo3.org/TYPO3v4/Extensions/phpunit.git typo3conf/ext/phpunit/
   - mv additional_reports ./typo3conf/ext
   - git clone --single-branch --branch master --depth 1 git://git.typo3.org/TYPO3v4/Extensions/tt_news.git typo3conf/ext/tt_news/
-  - mkdir fileadmin
-  - mkdir uploads
-  - mkdir typo3temp
-  - mv build-environment/Introduction/typo3conf/ext/introduction/Resources/Private/Subpackages/Introduction/Files/* .
+  #- mkdir fileadmin
+  #- mkdir uploads
+  #- mkdir typo3temp
+  - mv build-environment/Introduction/typo3conf/ext/introduction/Resources/Private/Subpackages/Introduction/Files/fileadmin .
+  - mv build-environment/Introduction/typo3conf/ext/introduction/Resources/Private/Subpackages/Introduction/Files/uploads .
+  - mv build-environment/Introduction/typo3conf/ext/introduction/Resources/Private/Subpackages/Introduction/Files/typo3temp .
   - if [[ "$DB" == "mysql" ]]; then mysql -e "DROP DATABASE IF EXISTS typo3_test;" -uroot; fi
   - if [[ "$DB" == "mysql" ]]; then mysql -e "create database IF NOT EXISTS typo3_test;" -uroot; fi
   - if [[ "$DB" == "mysql" ]]; then mysql -uroot typo3_test < build-environment/Introduction/typo3conf/ext/introduction/Resources/Private/Subpackages/Introduction/Database/introduction.sql; fi
