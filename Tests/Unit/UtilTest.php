@@ -436,8 +436,8 @@ class UtilTest extends Tx_Phpunit_TestCase {
 		$devVersion = TYPO3_version;
 		define('TYPO3_version', '4.5.32');
 		$jsonVersions = tx_additionalreports_util::getJsonVersionInfos();
-		define('TYPO3_version', $devVersion);
 		$this->testArray(tx_additionalreports_util::getCurrentVersionInfos($jsonVersions));
+		define('TYPO3_version', $devVersion);
 	}
 
 	/**
