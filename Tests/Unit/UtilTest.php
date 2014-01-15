@@ -422,7 +422,7 @@ class UtilTest extends Tx_Phpunit_TestCase {
 	 */
 	public function getJsonVersionInfos() {
 		$jsonVersions = tx_additionalreports_util::getJsonVersionInfos();
-		$currentVersion = explode('.', TYPO3_version);
+		$currentVersion = explode('.', '4.5.32');
 		$this->testArray($jsonVersions);
 		$this->testArray($jsonVersions[$currentVersion[0] . '.' . $currentVersion[1]]);
 		$this->testArray($jsonVersions[$currentVersion[0] . '.' . $currentVersion[1]]['releases']);
