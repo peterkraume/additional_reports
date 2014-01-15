@@ -1118,9 +1118,9 @@ class tx_additionalreports_util {
 	 *
 	 * @return array
 	 */
-	public static function getCurrentVersionInfos($jsonVersions) {
-		$currentVersion = explode('.', TYPO3_version);
-		return $jsonVersions[$currentVersion[0] . '.' . $currentVersion[1]]['releases'][TYPO3_version];
+	public static function getCurrentVersionInfos($jsonVersions, $version) {
+		$currentVersion = explode('.', $version);
+		return $jsonVersions[$currentVersion[0] . '.' . $currentVersion[1]]['releases'][$version];
 	}
 
 	/**
