@@ -35,6 +35,7 @@ before_script:
   - mv build-environment/typo3conf .
   - git clone --single-branch --branch master --depth 1 git://git.typo3.org/TYPO3v4/Extensions/phpunit.git typo3conf/ext/phpunit/
   - mv additional_reports ./typo3conf/ext
+  - git clone --single-branch --branch master --depth 1 git://git.typo3.org/TYPO3v4/Extensions/tt_news.git typo3conf/ext/tt_news
   - mkdir fileadmin
   - mkdir uploads
   - if [[ "$DB" == "mysql" ]]; then mysql -e "DROP DATABASE IF EXISTS typo3_test;" -uroot; fi

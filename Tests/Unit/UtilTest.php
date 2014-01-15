@@ -434,7 +434,7 @@ class UtilTest extends Tx_Phpunit_TestCase {
 	 */
 	public function getCurrentVersionInfos() {
 		$jsonVersions = tx_additionalreports_util::getJsonVersionInfos();
-		$this->testArray(tx_additionalreports_util::getCurrentVersionInfos($jsonVersions));
+		$this->testArray(tx_additionalreports_util::getCurrentVersionInfos('4.5.32'));
 	}
 
 	/**
