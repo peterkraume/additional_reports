@@ -498,8 +498,10 @@ class UtilTest extends Tx_Phpunit_TestCase {
 	 * @test
 	 */
 	public function initTSFE() {
-		tx_additionalreports_util::initTSFE(1);
-		$this->assertTrue(!empty($GLOBALS['TSFE']));
+		if (!defined('TYPO3_cliMode')) {
+			tx_additionalreports_util::initTSFE(1);
+			$this->assertTrue(!empty($GLOBALS['TSFE']));
+		}
 	}
 
 	/*
