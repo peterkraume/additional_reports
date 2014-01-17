@@ -201,6 +201,10 @@ class UtilTest extends Tx_Phpunit_TestCase {
 		$this->assertTrue($ext['type'] == 'L');
 		$this->assertTrue($ext['siteRelPath'] == 'typo3conf/ext/additional_reports/');
 		$this->assertTrue($ext['typo3RelPath'] == '../typo3conf/ext/additional_reports/');
+		$ext = tx_additionalreports_util::getExtensionType('reports');
+		$this->assertTrue($ext['type'] == 'S');
+		$this->assertTrue($ext['siteRelPath'] == 'typo3/sysext/reports/');
+		$this->assertTrue($ext['typo3RelPath'] == 'sysext/reports/');
 	}
 
 	/**
@@ -215,6 +219,8 @@ class UtilTest extends Tx_Phpunit_TestCase {
 	 */
 	public function getDomain() {
 		$domain = tx_additionalreports_util::getDomain(1);
+		$this->assertTrue(!empty($domain));
+		$domain = tx_additionalreports_util::getDomain(123456789);
 		$this->assertTrue(!empty($domain));
 	}
 
