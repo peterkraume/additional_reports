@@ -6,7 +6,7 @@ php:
 env:
 #  - DB=mysql TYPO3=master INTEGRATION=master
 #  - DB=mysql TYPO3=TYPO3_6-1 INTEGRATION=master
-#  - DB=mysql TYPO3=TYPO3_6-0 INTEGRATION=master
+  - DB=mysql TYPO3=TYPO3_6-0 INTEGRATION=master
   - DB=mysql TYPO3=TYPO3_4-7 INTEGRATION=TYPO3_4-7
   - DB=mysql TYPO3=TYPO3_4-6 INTEGRATION=TYPO3_4-7
   - DB=mysql TYPO3=TYPO3_4-5 INTEGRATION=TYPO3_4-7
@@ -49,6 +49,7 @@ before_script:
   - if [[ "$DB" == "mysql" && -f build-environment/dbimport/cli_users.sql ]]; then mysql -uroot typo3_test < build-environment/dbimport/cli_users.sql; fi
   - if [[ "$DB" == "mysql" && -f build-environment/dbimport/phpunit.sql ]]; then mysql -uroot typo3_test < build-environment/dbimport/phpunit.sql; fi
   - if [[ "$DB" == "mysql" && -f build-environment/dbimport/typo3-45-cache-extensions.sql ]]; then mysql -uroot typo3_test < build-environment/dbimport/typo3-45-cache-extensions.sql; fi
+  - if [[ "$DB" == "mysql" && -f build-environment/dbimport/typo3-6-cache-extensions.sql ]]; then mysql -uroot typo3_test < build-environment/dbimport/typo3-6-cache-extensions.sql; fi
 
 script:
   - /usr/bin/env php typo3/cli_dispatch.phpsh phpunit --colors --debug typo3conf/ext/additional_reports
