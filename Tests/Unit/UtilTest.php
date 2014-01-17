@@ -7,7 +7,6 @@ class UtilTest extends Tx_Phpunit_TestCase {
 	private $testingFramework;
 
 	public function setUp() {
-		require_once(PATH_typo3conf . 'ext/additional_reports/Classes/class.tx_additionalreports_util.php');
 		$this->testingFramework = new Tx_Phpunit_Framework('additional_reports');
 	}
 
