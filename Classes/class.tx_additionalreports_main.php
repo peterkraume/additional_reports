@@ -328,45 +328,32 @@ class tx_additionalreports_main {
 			foreach ($items as $itemKey => $itemValue) {
 				if (preg_match('/.*?\/.*?\.php/', $itemKey, $matches)) {
 					foreach ($itemValue as $hookName => $hookList) {
-						$hooks['core'][] = array(
+						$hookList = tx_additionalreports_util::getHook($hookList);
+						if (!empty($hookList)) {
+							$hooks['core'][] = array(
+								'corefile' => $itemKey,
+								'name'     => $hookName,
+								'file'     => tx_additionalreports_util::viewArray($hookList)
+							);
+						}
+					}
+				}
+			}
+		}
+
+		$items = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF'];
+		if (count($items) > 0) {
+			foreach ($items as $itemKey => $itemValue) {
+				foreach ($itemValue as $hookName => $hookList) {
+					$hookList = tx_additionalreports_util::getHook($hookList);
+					if (!empty($hookList)) {
+						$hooks['extensions'][] = array(
 							'corefile' => $itemKey,
 							'name'     => $hookName,
 							'file'     => tx_additionalreports_util::viewArray($hookList)
 						);
 					}
 				}
-			}
-		}
-
-		// extension hooks (we read the temp_CACHED and look for $EXTCONF modification)
-		$tempCached = tx_additionalreports_util::getCacheFilePrefix() . '_ext_localconf.php';
-		$items = array();
-		if (is_file(PATH_site . 'typo3conf/' . $tempCached)) {
-			$handle = fopen(PATH_site . 'typo3conf/' . $tempCached, 'r');
-			$extension = '';
-			if ($handle) {
-				while (!feof($handle)) {
-					$buffer = fgets($handle);
-					if ($extension != '') {
-						if (preg_match("/\['EXTCONF'\]\['(.*?)'\](.*?)\s*=/", $buffer, $matches)) {
-							if ($matches[1] != $extension) {
-								$items[] = array($extension, $matches[1] . ' --> ' . $matches[2]);
-							}
-						}
-					}
-					if (preg_match('/## EXTENSION: (.*?)$/', $buffer, $matches)) {
-						$extension = $matches[1];
-					}
-				}
-				fclose($handle);
-			}
-		}
-		if (count($items) > 0) {
-			foreach ($items as $itemValue) {
-				$hooks['extensions'][] = array(
-					'extension' => $itemValue[0],
-					'line'      => $itemValue[1]
-				);
 			}
 		}
 
