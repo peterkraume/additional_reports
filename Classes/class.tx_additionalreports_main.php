@@ -237,8 +237,15 @@ class tx_additionalreports_main {
 		// need extension update ?
 		if (version_compare($itemValue['EM_CONF']['version'], $itemValue['lastversion']['version'], '<')) {
 			$listExtensionsTerItem['versionlast'] = '<span style="color:green;font-weight:bold;">' . $itemValue['lastversion']['version'] . '&nbsp;(' . $itemValue['lastversion']['updatedate'] . ')</span>';
+			$compareUrl = t3lib_div::getIndpEnv('TYPO3_SITE_URL');
+			$compareUrl .= 'index.php?eID=additional_reports_compareFiles';
+			$compareUrl .= '&extKey=' . $extKey . '&mode=compareExtension&extVersion=' . $itemValue['lastversion']['version'];
+			$compareLabem = $extKey . ' : ' . $itemValue['EM_CONF']['version'] . ' <--> ' . $itemValue['lastversion']['version'];
+			$js = 'Shadowbox.open({content:\'' . $compareUrl . '\',player:\'iframe\',title:\'' . $compareLabem . '\',height:600,width:800});';
+			$listExtensionsTerItem['versionlastcompare'] = '<input type="button" onclick="' . $js . '" value="+" title="' . $compareLabem . '"/>';
 		} else {
 			$listExtensionsTerItem['versionlast'] = $itemValue['lastversion']['version'] . '&nbsp;(' . $itemValue['lastversion']['updatedate'] . ')';
+			$listExtensionsTerItem['versionlastcompare'] = '&nbsp;';
 		}
 
 		$listExtensionsTerItem['downloads'] = $itemValue['lastversion']['alldownloadcounter'];

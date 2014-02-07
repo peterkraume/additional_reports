@@ -331,6 +331,26 @@ class tx_additionalreports_util {
 	}
 
 	/**
+	 * Get all all files and md5 to check modified files of the last version
+	 *
+	 * @param string $extension
+	 * @param string $version
+	 * @return array
+	 */
+	public function getFilesMDArrayFromT3x($extension, $version) {
+		$firstLetter = strtolower(substr($extension, 0, 1));
+		$secondLetter = strtolower(substr($extension, 1, 1));
+		$from = 'http://typo3.org/fileadmin/ter/' . $firstLetter . '/' . $secondLetter . '/' . $extension . '_' . $version . '.t3x';
+		$content = t3lib_div::getURL($from);
+		$t3xfiles = self::extractExtensionDataFromT3x($content);
+		$filesMD5Array = array();
+		foreach ($t3xfiles['FILES'] as $file => $infos) {
+			$filesMD5Array[$file] = substr($infos['content_md5'], 0, 4);
+		}
+		return $filesMD5Array;
+	}
+
+	/**
 	 * Get all modified files
 	 *
 	 * @param array $extInfo
@@ -338,6 +358,17 @@ class tx_additionalreports_util {
 	 */
 	public static function getExtAffectedFiles($extInfo) {
 		$currentMd5Array = self::getFilesMDArray($extInfo);
+		return self::findMD5ArrayDiff($currentMd5Array, unserialize($extInfo['EM_CONF']['_md5_values_when_last_written']));
+	}
+
+	/**
+	 * Get all modified files
+	 *
+	 * @param array $extInfo
+	 * @return array
+	 */
+	public static function getExtAffectedFilesLastVersion($extInfo) {
+		$currentMd5Array = self::getFilesMDArrayFromT3x($extInfo['extkey'], $extInfo['lastversion']['version']);
 		return self::findMD5ArrayDiff($currentMd5Array, unserialize($extInfo['EM_CONF']['_md5_values_when_last_written']));
 	}
 
