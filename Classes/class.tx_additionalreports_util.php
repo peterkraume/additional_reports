@@ -553,7 +553,11 @@ class tx_additionalreports_util {
 	 * @return array
 	 */
 	public function getSqlUpdateStatements() {
-		$tblFileContent = t3lib_div::getUrl(PATH_t3lib . 'stddb/tables.sql');
+		if (self::intFromVer(TYPO3_version) < 6001000) {
+			$tblFileContent = t3lib_div::getUrl(PATH_t3lib . 'stddb/tables.sql');
+		} else {
+			$tblFileContent = t3lib_div::getUrl(PATH_typo3 . 'sysext/core/ext_tables.sql');
+		}
 
 		foreach ($GLOBALS['TYPO3_LOADED_EXT'] as $loadedExtConf) {
 			if (is_array($loadedExtConf) && $loadedExtConf['ext_tables.sql']) {

@@ -465,7 +465,9 @@ class tx_additionalreports_main {
 		}
 
 		// MySQL
-		$content = tx_additionalreports_util::writeInformation('Version', mysql_get_server_info());
+		if (function_exists('mysql_get_server_info')) {
+			$content = tx_additionalreports_util::writeInformation('Version', mysql_get_server_info());
+		}
 		$items = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
 			'default_character_set_name, default_collation_name',
 			'information_schema.schemata',
