@@ -641,6 +641,10 @@ class tx_additionalreports_util {
 			$installClass = 't3lib_install_Sql';
 		}
 
+		if (self::intFromVer(TYPO3_version) >= 6002000) {
+			$installClass = 'TYPO3\\CMS\\Install\\Service\\SqlSchemaMigrationService';
+		}
+
 		return $installClass;
 	}
 
