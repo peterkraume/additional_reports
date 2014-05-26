@@ -73,6 +73,7 @@ class tx_additionalreports_util {
 				$parameters[] = 'tx_reports_system_reportstxreportsm1%5Breport%5D=' . $vars['report'];
 				$parameters[] = 'tx_reports_system_reportstxreportsm1%5Baction%5D=detail';
 				$parameters[] = 'tx_reports_system_reportstxreportsm1%5Bcontroller%5D=Report';
+				$parameters[] = 'moduleToken=' . \TYPO3\CMS\Core\FormProtection\FormProtectionFactory::get()->generateToken('moduleCall', 'system_ReportsTxreportsm1');
 			}
 		}
 		return $baseUrl . implode('&', $parameters);
